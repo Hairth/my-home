@@ -1,26 +1,54 @@
-@import "tailwindcss";
+﻿@import \"tailwindcss\";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-serif: var(--font-serif);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans);
+}
+
+/* Beautiful Chinese typography support */
+h1, h2, h3 {
+  font-family: var(--font-geist-sans);
+}
+
+.prose {
+  font-family: var(--font-serif);
+}
+
+/* Smooth everything */
+a, button {
+  transition-property: color, background-color, border-color, transform, box-shadow;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.23, 1.0, 0.32, 1);
+}
+
+/* Card hover polish from reference projects */
+.group:hover {
+  box-shadow: 0 10px 30px -15px rgb(0 0 0 / 0.1);
+}
+
+.dark .group:hover {
+  box-shadow: 0 10px 30px -15px rgb(0 0 0 / 0.4);
+}
+
+/* Focus rings */
+input:focus, button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(163 163 172 / 0.2);
+}
+
+.dark input:focus, .dark button:focus-visible {
+  box-shadow: 0 0 0 3px rgb(63 63 70 / 0.4);
+}
+
+/* Elegant line clamp */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
