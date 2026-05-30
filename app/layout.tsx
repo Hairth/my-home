@@ -24,6 +24,7 @@ const notoSerif = Noto_Serif_SC({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
   title: {
     default: 'Hairth · 星火',
     template: '%s | Hairth · 星火',
@@ -45,10 +46,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang=\"zh-CN\" className={\\ \ \ h-full antialiased\ } suppressHydrationWarning>
-      <body className=\"min-h-full flex flex-col bg-[#fafaf9] text-stone-900 dark:bg-[#0a0a0a] dark:text-stone-100\">
+    <html lang="zh-CN" className={`${geistSans.variable} ${geistMono.variable} ${notoSerif.variable} h-full antialiased`} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col bg-[#fafaf9] text-stone-900 dark:bg-[#0a0a0a] dark:text-stone-100">
         <SiteHeader />
-        <main className=\"flex-1\">{children}</main>
+        <main className="flex-1">{children}</main>
         <SiteFooter />
       </body>
     </html>
