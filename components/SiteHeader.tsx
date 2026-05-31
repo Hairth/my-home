@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Menu, Moon, Settings, Sun, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
 
 function getPreferredTheme() {
@@ -15,9 +16,12 @@ function getPreferredTheme() {
 
 export function SiteHeader() {
   const { settings } = useSiteSettings();
+  const pathname = usePathname();
   const [isDark, setIsDark] = useState(false);
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const isHomePath = pathname === '/';
 
   const navLinks = useMemo(
     () => [
@@ -45,6 +49,40 @@ export function SiteHeader() {
     document.documentElement.classList.toggle('dark', isDark);
   }, [isDark, isThemeLoaded]);
 
+  useEffect(() => {
+    const headerElement = headerRef.current;
+    if (!headerElement) return undefined;
+    const visibleHeader = headerElement;
+
+    function setHeaderVisible(isVisible: boolean) {
+      visibleHeader.classList.toggle('pointer-events-none', !isVisible);
+      visibleHeader.classList.toggle('-translate-y-full', !isVisible);
+      visibleHeader.classList.toggle('opacity-0', !isVisible);
+      visibleHeader.classList.toggle('translate-y-0', isVisible);
+      visibleHeader.classList.toggle('opacity-100', isVisible);
+    }
+
+    if (!isHomePath) {
+      setHeaderVisible(true);
+      return undefined;
+    }
+
+    function updateHeaderVisibility() {
+      const threshold = Math.max(260, window.innerHeight * 0.74);
+      setHeaderVisible(window.scrollY > threshold);
+    }
+
+    const frame = window.requestAnimationFrame(updateHeaderVisibility);
+    window.addEventListener('scroll', updateHeaderVisibility, { passive: true });
+    window.addEventListener('resize', updateHeaderVisibility);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', updateHeaderVisibility);
+      window.removeEventListener('resize', updateHeaderVisibility);
+    };
+  }, [isHomePath]);
+
   function toggleTheme() {
     const nextDark = !isDark;
     setIsDark(nextDark);
@@ -52,7 +90,14 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-200/70 bg-white/86 backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/82">
+    <header
+      ref={headerRef}
+      className={`z-50 border-b border-zinc-200/70 bg-white/86 backdrop-blur-xl transition duration-300 dark:border-white/10 dark:bg-zinc-950/82 ${
+        isHomePath
+          ? 'pointer-events-none fixed inset-x-0 top-0 -translate-y-full opacity-0'
+          : 'sticky top-0 translate-y-0 opacity-100'
+      }`}
+    >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-6">
         <Link className="group flex min-w-0 items-center gap-3" href="/">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-zinc-950 text-white shadow-sm dark:bg-white dark:text-zinc-950">

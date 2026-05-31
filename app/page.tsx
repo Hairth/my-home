@@ -159,13 +159,6 @@ export default function Home() {
                 阅读文章
                 <ArrowRight aria-hidden="true" size={18} />
               </Link>
-              <Link
-                className="inline-flex h-12 items-center justify-center gap-3 rounded-full border border-white/35 px-6 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10"
-                href="/settings"
-              >
-                打开设置
-                <Settings2 aria-hidden="true" size={18} />
-              </Link>
             </div>
           </div>
 

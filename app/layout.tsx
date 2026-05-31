@@ -1,29 +1,9 @@
 ﻿import type { Metadata } from 'next';
-import { Geist, Geist_Mono, Noto_Serif_SC } from 'next/font/google';
 import './globals.css';
 import { SettingsProvider } from '@/components/settings/SettingsProvider';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { WelcomeSplash } from '@/components/WelcomeSplash';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-});
-
-const notoSerif = Noto_Serif_SC({
-  variable: '--font-serif',
-  subsets: ['latin', 'latin-ext'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
@@ -48,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN" className={`${geistSans.variable} ${geistMono.variable} ${notoSerif.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="zh-CN" className="h-full antialiased" suppressHydrationWarning>
       <body className="min-h-full flex flex-col bg-[#f6f8fb] text-zinc-900 dark:bg-[#09090b] dark:text-zinc-100">
         <SettingsProvider>
           <WelcomeSplash />
