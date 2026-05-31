@@ -1,85 +1,124 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
+import {
+  ArrowRight,
+  BookOpen,
+  Calendar,
+  FolderKanban,
+  MessageSquarePlus,
+  Music2,
+  Settings2,
+  Sparkles,
+  Users,
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { RotatingHeroBackground } from '@/components/RotatingHeroBackground';
+import { useSiteSettings } from '@/components/settings/SettingsProvider';
+import { friends, initialMoments, projects, tracks, writings, type Moment, type Writing } from '@/data/site-data';
 
-type Writing = {
-  slug: string;
+const MOMENTS_STORAGE_KEY = 'my-home:moments:v1';
+
+function WritingCard({ writing }: { writing: Writing }) {
+  return (
+    <Link
+      className="group block rounded-lg border border-zinc-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-cyan-400 hover:shadow-xl hover:shadow-cyan-950/5 dark:border-white/10 dark:bg-zinc-900/72 dark:hover:border-cyan-300/70"
+      href={`/writings/${writing.slug}`}
+    >
+      <div className="mb-4 flex items-center justify-between gap-4 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+        <span>{writing.date}</span>
+        <span>{writing.readingTime}</span>
+      </div>
+      <h3 className="mb-3 text-2xl font-semibold leading-tight tracking-normal underline-offset-4 group-hover:underline">
+        {writing.title}
+      </h3>
+      <p className="mb-5 line-clamp-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">{writing.excerpt}</p>
+      <div className="flex flex-wrap gap-2">
+        {writing.tags.map((tag) => (
+          <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs text-cyan-700 dark:bg-cyan-300/10 dark:text-cyan-200" key={tag}>
+            {tag}
+          </span>
+        ))}
+      </div>
+    </Link>
+  );
+}
+
+function SectionHeading({ eyebrow, title, summary }: { eyebrow: string; title: string; summary: string }) {
+  return (
+    <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <div className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-300">{eyebrow}</div>
+        <h2 className="text-4xl font-semibold tracking-normal md:text-5xl">{title}</h2>
+      </div>
+      <p className="max-w-md text-sm leading-7 text-zinc-600 dark:text-zinc-300 md:text-base">{summary}</p>
+    </div>
+  );
+}
+
+function ModuleLink({
+  href,
+  title,
+  summary,
+  icon,
+}: {
+  href: string;
   title: string;
-  date: string;
-  excerpt: string;
-  tags: string[];
-  readingTime: string;
-};
-
-type Moment = {
-  id: number;
-  date: string;
-  content: string;
-  mood: string;
-};
-
-const writings: Writing[] = [
-  {
-    slug: 'hello-world',
-    title: '你好，星火',
-    date: '2026-05-28',
-    excerpt: '从零开始构建一个属于自己的数字花园。记录思考、分享生活、构建未来。',
-    tags: ['思考', '起点'],
-    readingTime: '3 min',
-  },
-  {
-    slug: 'on-building',
-    title: '关于构建',
-    date: '2026-05-20',
-    excerpt: '好的工具应该安静、可靠、值得信赖。代码如此，个人网站也如此。',
-    tags: ['工程', '哲学'],
-    readingTime: '8 min',
-  },
-  {
-    slug: 'japan-vps-notes',
-    title: '日本 VPS 网络调优笔记',
-    date: '2026-05-15',
-    excerpt: '从 Hysteria2 到 Clash Verge 的完整路由实践，以及高延迟环境下的稳定体验。',
-    tags: ['网络', 'VPS', '实践'],
-    readingTime: '12 min',
-  },
-];
-
-const initialMoments: Moment[] = [
-  {
-    id: 1,
-    date: '2026-05-30',
-    content: '今天把个人网站的基础框架搭好了。Next.js 16 + Tailwind 4，感觉很舒服。',
-    mood: '✨',
-  },
-  {
-    id: 2,
-    date: '2026-05-29',
-    content: '研究了两个参考项目，一个偏静态审美，一个偏动态博客系统。决定融合两者之长。',
-    mood: '🌱',
-  },
-  {
-    id: 3,
-    date: '2026-05-27',
-    content: '又一次深刻体会到：工具的边界，就是创造力的边界。',
-    mood: '💭',
-  },
-];
+  summary: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <Link
+      className="group flex min-h-40 flex-col justify-between rounded-lg border border-zinc-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-rose-400 hover:shadow-xl hover:shadow-rose-950/5 dark:border-white/10 dark:bg-zinc-900 dark:hover:border-rose-300/70"
+      href={href}
+    >
+      <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
+        {icon}
+      </div>
+      <div>
+        <h3 className="text-xl font-semibold">{title}</h3>
+        <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{summary}</p>
+      </div>
+    </Link>
+  );
+}
 
 export default function Home() {
+  const { settings } = useSiteSettings();
   const [moments, setMoments] = useState<Moment[]>(initialMoments);
   const [newMoment, setNewMoment] = useState('');
   const [filterTag, setFilterTag] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const tags = Array.from(new Set(writings.flatMap((writing) => writing.tags)));
-  const visibleWritings = writings
-    .filter((writing) => !filterTag || writing.tags.includes(filterTag))
-    .filter((writing) => {
-      const query = searchQuery.trim().toLowerCase();
-      if (!query) return true;
-      return `${writing.title} ${writing.excerpt} ${writing.tags.join(' ')}`.toLowerCase().includes(query);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const raw = window.localStorage.getItem(MOMENTS_STORAGE_KEY);
+      if (!raw) return;
+
+      try {
+        const parsed = JSON.parse(raw) as Moment[];
+        if (Array.isArray(parsed)) {
+          setMoments(parsed);
+        }
+      } catch {
+        setMoments(initialMoments);
+      }
     });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  const tags = useMemo(() => Array.from(new Set(writings.flatMap((writing) => writing.tags))), []);
+
+  const visibleWritings = useMemo(() => {
+    return writings
+      .filter((writing) => !filterTag || writing.tags.includes(filterTag))
+      .filter((writing) => {
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return true;
+        return `${writing.title} ${writing.excerpt} ${writing.tags.join(' ')}`.toLowerCase().includes(query);
+      });
+  }, [filterTag, searchQuery]);
 
   function addMoment() {
     const content = newMoment.trim();
@@ -95,66 +134,123 @@ export default function Home() {
     const nextMoments = [nextMoment, ...moments];
     setMoments(nextMoments);
     setNewMoment('');
-    window.localStorage.setItem('my-home-moments', JSON.stringify(nextMoments));
+    window.localStorage.setItem(MOMENTS_STORAGE_KEY, JSON.stringify(nextMoments));
   }
 
   return (
     <>
-      <section className="relative flex min-h-[92vh] items-center justify-center overflow-hidden border-b border-stone-200 bg-[#fafaf9] dark:border-stone-800 dark:bg-[#0a0a0a]">
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e5e5_0.8px,transparent_1px)] [background-size:4px_4px] opacity-60 dark:bg-[radial-gradient(#1f2937_0.8px,transparent_1px)]" />
-        <div className="relative mx-auto max-w-4xl px-6 text-center">
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-stone-200 px-4 py-1 text-xs font-medium text-stone-500 dark:border-stone-800 dark:text-stone-400">
-            DIGITAL GARDEN · 数字花园
+      <section className="relative isolate flex min-h-[calc(100vh-4rem)] items-center overflow-hidden bg-zinc-950 text-white">
+        <RotatingHeroBackground />
+        <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-10 px-5 py-20 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
+          <div className="max-w-3xl">
+            <div className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-cyan-100">
+              <Sparkles aria-hidden="true" size={18} />
+              DIGITAL GARDEN
+            </div>
+            <h1 className="text-5xl font-semibold leading-none tracking-normal md:text-7xl lg:text-8xl">
+              {settings.profile.siteTitle}
+            </h1>
+            <p className="mt-7 max-w-2xl text-lg leading-8 text-white/78 md:text-xl">{settings.profile.tagline}</p>
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+              <Link
+                className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-white px-6 text-sm font-semibold text-zinc-950 transition hover:-translate-y-0.5 hover:bg-cyan-50"
+                href="/writings"
+              >
+                阅读文章
+                <ArrowRight aria-hidden="true" size={18} />
+              </Link>
+              <Link
+                className="inline-flex h-12 items-center justify-center gap-3 rounded-full border border-white/35 px-6 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10"
+                href="/settings"
+              >
+                打开设置
+                <Settings2 aria-hidden="true" size={18} />
+              </Link>
+            </div>
           </div>
-          <h1 className="mb-8 text-7xl font-semibold leading-[0.92] tracking-[-3px] text-stone-950 dark:text-white md:text-8xl">
-            星火<br />照亮<br />自己的路。
-          </h1>
-          <p className="mx-auto mb-10 max-w-md text-xl text-stone-600 dark:text-stone-400">
-            Hairth 的私人数字空间。<br />
-            记录思考 · 分享生活 · 构建未来。
-          </p>
-          <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <a className="inline-flex h-14 items-center justify-center rounded-2xl bg-stone-950 px-10 text-base font-medium text-white transition hover:opacity-90 dark:bg-white dark:text-stone-950" href="#writings">
-              阅读文章
-            </a>
-            <a className="inline-flex h-14 items-center justify-center rounded-2xl border border-stone-300 px-10 text-base font-medium transition hover:bg-stone-50 dark:border-stone-700 dark:hover:bg-stone-900" href="#moments">
-              查看瞬间
-            </a>
+
+          <div className="rounded-lg border border-white/18 bg-white/12 p-6 backdrop-blur-xl">
+            <div className="flex items-center gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt={settings.profile.authorName}
+                className="h-16 w-16 rounded-lg object-cover ring-1 ring-white/25"
+                src={settings.profile.avatarUrl}
+              />
+              <div>
+                <div className="text-2xl font-semibold">{settings.profile.authorName}</div>
+                <div className="mt-1 text-sm text-white/65">{settings.profile.location}</div>
+              </div>
+            </div>
+            <p className="mt-6 text-sm leading-7 text-white/75">{settings.profile.bio}</p>
+            <div className="mt-7 grid grid-cols-3 gap-3 text-center">
+              <div className="rounded-lg bg-white/12 px-3 py-4">
+                <div className="text-2xl font-semibold">{writings.length}</div>
+                <div className="mt-1 text-xs text-white/60">文章</div>
+              </div>
+              <div className="rounded-lg bg-white/12 px-3 py-4">
+                <div className="text-2xl font-semibold">{moments.length}</div>
+                <div className="mt-1 text-xs text-white/60">瞬间</div>
+              </div>
+              <div className="rounded-lg bg-white/12 px-3 py-4">
+                <div className="text-2xl font-semibold">{projects.length}</div>
+                <div className="mt-1 text-xs text-white/60">项目</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="writings" className="mx-auto max-w-6xl px-6 py-20">
-        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="mb-2 text-xs font-medium uppercase text-stone-500 dark:text-stone-400">WRITINGS</div>
-            <h2 className="text-5xl font-semibold tracking-[-1.5px]">文章与笔记</h2>
+      {settings.modules.dashboard && (
+        <section className="border-b border-zinc-200 bg-white py-12 dark:border-white/10 dark:bg-zinc-950">
+          <div className="mx-auto grid max-w-7xl gap-4 px-5 sm:px-6 md:grid-cols-4">
+            <ModuleLink href="/writings" icon={<BookOpen size={21} />} summary="按标签和关键词浏览写作记录。" title="文章库" />
+            {settings.modules.moments && (
+              <ModuleLink href="/moments" icon={<MessageSquarePlus size={21} />} summary="保存短句、状态和当天的小发现。" title="瞬间" />
+            )}
+            {settings.modules.projects && (
+              <ModuleLink href="/projects" icon={<FolderKanban size={21} />} summary="整理正在构建的工具与实验。" title="项目" />
+            )}
+            {settings.modules.friends && (
+              <ModuleLink href="/friends" icon={<Users size={21} />} summary="收纳参考项目与朋友链接。" title="友链" />
+            )}
           </div>
-          <p className="max-w-md text-sm text-stone-600 dark:text-stone-400 md:text-base">
-            技术实践、思考随笔与生活记录。全部内容都可以继续接入 Markdown/MDX。
-          </p>
-        </div>
+        </section>
+      )}
 
-        <div className="mb-8 flex flex-col gap-4 md:flex-row">
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-6">
+        <SectionHeading eyebrow="WRITINGS" summary="技术实践、生活随笔和长期思考都会沉到这里，后续可以继续接入 Markdown/MDX。" title="文章与笔记" />
+
+        <div className="mb-8 flex flex-col gap-4 lg:flex-row">
           <input
-            className="flex-1 rounded-2xl border border-stone-200 bg-white px-6 py-3 text-sm placeholder:text-stone-400 focus:border-stone-400 focus:outline-none dark:border-stone-800 dark:bg-[#111]"
+            className="min-h-12 flex-1 rounded-lg border border-zinc-200 bg-white px-5 text-sm placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-900"
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="搜索文章标题或内容..."
+            placeholder="搜索文章标题、摘要或标签"
             type="text"
             value={searchQuery}
           />
           <div className="flex flex-wrap gap-2">
             <button
-              className={`rounded-full border px-5 py-1.5 text-sm transition ${!filterTag ? 'border-stone-950 bg-stone-950 text-white dark:border-white dark:bg-white dark:text-stone-950' : 'border-stone-200 hover:bg-stone-50 dark:border-stone-800 dark:hover:bg-stone-900'}`}
+              className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
+                !filterTag
+                  ? 'border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950'
+                  : 'border-zinc-200 hover:border-cyan-400 dark:border-white/10 dark:hover:border-cyan-300'
+              }`}
               onClick={() => setFilterTag(null)}
+              type="button"
             >
               全部
             </button>
             {tags.map((tag) => (
               <button
-                className={`rounded-full border px-5 py-1.5 text-sm transition ${filterTag === tag ? 'border-stone-950 bg-stone-950 text-white dark:border-white dark:bg-white dark:text-stone-950' : 'border-stone-200 hover:bg-stone-50 dark:border-stone-800 dark:hover:bg-stone-900'}`}
+                className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
+                  filterTag === tag
+                    ? 'border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950'
+                    : 'border-zinc-200 hover:border-cyan-400 dark:border-white/10 dark:hover:border-cyan-300'
+                }`}
                 key={tag}
                 onClick={() => setFilterTag(tag === filterTag ? null : tag)}
+                type="button"
               >
                 {tag}
               </button>
@@ -162,71 +258,100 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {visibleWritings.map((writing) => (
-            <a className="group block rounded-3xl border border-stone-200 bg-white p-7 transition hover:-translate-y-0.5 hover:border-stone-300 dark:border-stone-800 dark:bg-[#111] dark:hover:border-stone-700" href={`/writings/${writing.slug}`} key={writing.slug}>
-              <div className="mb-4 flex items-center justify-between font-mono text-xs text-stone-500 dark:text-stone-400">
-                <span>{writing.date}</span>
-                <span>{writing.readingTime}</span>
-              </div>
-              <h3 className="mb-4 text-2xl font-semibold leading-tight tracking-[-0.5px] underline-offset-4 group-hover:underline">
-                {writing.title}
-              </h3>
-              <p className="mb-6 line-clamp-3 text-[15px] leading-relaxed text-stone-600 dark:text-stone-400">
-                {writing.excerpt}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {writing.tags.map((tag) => (
-                  <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600 dark:bg-stone-900 dark:text-stone-400" key={tag}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </a>
+            <WritingCard key={writing.slug} writing={writing} />
           ))}
         </div>
       </section>
 
-      <section id="moments" className="border-y border-stone-200 bg-white py-20 dark:border-stone-800 dark:bg-[#111]">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-10">
-            <div className="mb-2 text-xs font-medium uppercase text-stone-500 dark:text-stone-400">MOMENTS</div>
-            <h2 className="text-5xl font-semibold tracking-[-1.5px]">瞬间记录</h2>
-            <p className="mt-3 max-w-md text-stone-600 dark:text-stone-400">那些闪过的念头、心情与小发现。随时记录，随时回顾。</p>
-          </div>
+      {settings.modules.moments && (
+        <section className="border-y border-zinc-200 bg-zinc-50 py-20 dark:border-white/10 dark:bg-zinc-900/44">
+          <div className="mx-auto max-w-7xl px-5 sm:px-6">
+            <SectionHeading eyebrow="MOMENTS" summary="像 XinghuisamaBlogs 的动态页一样，把短想法留在本地，刷新后仍然保留。" title="瞬间记录" />
 
-          <div className="mb-10 rounded-3xl border border-stone-200 bg-[#fafaf9] p-6 dark:border-stone-800 dark:bg-black/40 md:p-8">
-            <div className="mb-3 text-sm font-medium text-stone-500 dark:text-stone-400">记录此刻</div>
-            <div className="flex gap-3">
-              <input
-                className="flex-1 rounded-2xl border border-stone-200 bg-white px-6 py-4 text-[15px] placeholder:text-stone-400 focus:border-stone-400 focus:outline-none dark:border-stone-700 dark:bg-[#1a1a1a]"
-                onChange={(event) => setNewMoment(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') addMoment();
-                }}
-                placeholder="今天有什么想说的……"
-                value={newMoment}
-              />
-              <button className="rounded-2xl bg-stone-950 px-8 font-medium text-white transition disabled:opacity-50 dark:bg-white dark:text-stone-950" disabled={!newMoment.trim()} onClick={addMoment}>
-                记录
-              </button>
+            <div className="mb-10 rounded-lg border border-zinc-200 bg-white p-5 dark:border-white/10 dark:bg-zinc-950 md:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <input
+                  className="min-h-12 flex-1 rounded-lg border border-zinc-200 bg-white px-5 text-sm placeholder:text-zinc-400 focus:border-rose-500 dark:border-white/10 dark:bg-zinc-900"
+                  onChange={(event) => setNewMoment(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') addMoment();
+                  }}
+                  placeholder="今天有什么想说的"
+                  value={newMoment}
+                />
+                <button
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-rose-600 px-6 text-sm font-semibold text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-45"
+                  disabled={!newMoment.trim()}
+                  onClick={addMoment}
+                  type="button"
+                >
+                  <MessageSquarePlus aria-hidden="true" size={18} />
+                  记录
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-3">
+              {moments.slice(0, 6).map((moment) => (
+                <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-white/10 dark:bg-zinc-950" key={moment.id}>
+                  <div className="mb-4 flex items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
+                    <span className="text-xl">{moment.mood}</span>
+                    <Calendar aria-hidden="true" size={16} />
+                    <span>{moment.date}</span>
+                  </div>
+                  <p className="text-sm leading-7 text-zinc-700 dark:text-zinc-200">{moment.content}</p>
+                </div>
+              ))}
             </div>
           </div>
+        </section>
+      )}
 
-          <div className="max-w-3xl space-y-4">
-            {moments.map((moment) => (
-              <div className="group flex gap-6 rounded-3xl border border-stone-200 bg-white p-7 transition hover:border-stone-300 dark:border-stone-800 dark:bg-[#111] dark:hover:border-stone-700" key={moment.id}>
-                <div className="shrink-0 text-3xl opacity-70 transition group-hover:opacity-100">{moment.mood}</div>
-                <div className="min-w-0 flex-1">
-                  <div className="mb-2 flex items-center gap-3 font-mono text-xs text-stone-500 dark:text-stone-400">
-                    <span>{moment.date}</span>
-                    <div className="h-px flex-1 bg-stone-200 dark:bg-stone-800" />
-                  </div>
-                  <p className="text-[15px] leading-relaxed text-stone-800 dark:text-stone-200">{moment.content}</p>
-                </div>
-              </div>
-            ))}
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-6">
+        <SectionHeading eyebrow="BOARD" summary="主页保留常用入口，独立子页面负责更完整的筛选、查看和管理体验。" title="功能面板" />
+
+        <div className="grid gap-5 lg:grid-cols-3">
+          {settings.modules.projects && (
+            <Link className="rounded-lg border border-zinc-200 bg-white p-6 transition hover:border-violet-400 dark:border-white/10 dark:bg-zinc-900" href="/projects">
+              <FolderKanban aria-hidden="true" className="mb-5 text-violet-600 dark:text-violet-300" size={28} />
+              <h3 className="text-2xl font-semibold">项目</h3>
+              <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">{projects[0].description}</p>
+            </Link>
+          )}
+          {settings.modules.friends && (
+            <Link className="rounded-lg border border-zinc-200 bg-white p-6 transition hover:border-emerald-400 dark:border-white/10 dark:bg-zinc-900" href="/friends">
+              <Users aria-hidden="true" className="mb-5 text-emerald-600 dark:text-emerald-300" size={28} />
+              <h3 className="text-2xl font-semibold">友链</h3>
+              <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">已收录 {friends.length} 个参考与同步位置。</p>
+            </Link>
+          )}
+          {settings.modules.music && (
+            <Link className="rounded-lg border border-zinc-200 bg-white p-6 transition hover:border-amber-400 dark:border-white/10 dark:bg-zinc-900" href="/music">
+              <Music2 aria-hidden="true" className="mb-5 text-amber-600 dark:text-amber-300" size={28} />
+              <h3 className="text-2xl font-semibold">音乐</h3>
+              <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">准备了 {tracks.length} 个歌单入口，写作时可以快速切换氛围。</p>
+            </Link>
+          )}
+        </div>
+      </section>
+
+      <section className="border-t border-zinc-200 bg-white py-16 dark:border-white/10 dark:bg-zinc-950">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 sm:px-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-3xl font-semibold tracking-normal">欢迎词和图源已经接入设置</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-600 dark:text-zinc-300">
+              修改欢迎标题、图片 API、轮换间隔或模块开关后，主页和欢迎页会立即使用新的配置。
+            </p>
           </div>
+          <Link
+            className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-zinc-950 px-6 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-cyan-700 dark:bg-white dark:text-zinc-950 dark:hover:bg-cyan-100"
+            href="/settings"
+          >
+            <Settings2 aria-hidden="true" size={18} />
+            管理设置
+          </Link>
         </div>
       </section>
     </>

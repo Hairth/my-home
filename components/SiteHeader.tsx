@@ -1,15 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, Moon, Sun, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
-const navLinks = [
-  { href: '/#writings', label: '文章' },
-  { href: '/#moments', label: '瞬间' },
-  { href: '/#about', label: '关于' },
-  { href: '/#links', label: '链接' },
-];
+import { Menu, Moon, Settings, Sun, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSiteSettings } from '@/components/settings/SettingsProvider';
 
 function getPreferredTheme() {
   if (typeof window === 'undefined') return false;
@@ -20,12 +14,36 @@ function getPreferredTheme() {
 }
 
 export function SiteHeader() {
-  const [isDark, setIsDark] = useState(getPreferredTheme);
+  const { settings } = useSiteSettings();
+  const [isDark, setIsDark] = useState(false);
+  const [isThemeLoaded, setIsThemeLoaded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const navLinks = useMemo(
+    () => [
+      { href: '/writings', label: '文章', enabled: true },
+      { href: '/moments', label: '瞬间', enabled: settings.modules.moments },
+      { href: '/projects', label: '项目', enabled: settings.modules.projects },
+      { href: '/friends', label: '友链', enabled: settings.modules.friends },
+      { href: '/music', label: '音乐', enabled: settings.modules.music },
+      { href: '/about', label: '关于', enabled: true },
+    ],
+    [settings.modules.friends, settings.modules.moments, settings.modules.music, settings.modules.projects],
+  );
+
   useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setIsDark(getPreferredTheme());
+      setIsThemeLoaded(true);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    if (!isThemeLoaded) return;
     document.documentElement.classList.toggle('dark', isDark);
-  }, [isDark]);
+  }, [isDark, isThemeLoaded]);
 
   function toggleTheme() {
     const nextDark = !isDark;
@@ -34,52 +52,86 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-stone-200/70 bg-white/80 backdrop-blur-xl dark:border-stone-800/70 dark:bg-[#0a0a0a]/80">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link className="group flex items-center gap-3" href="/">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-stone-900 to-stone-700 dark:from-white dark:to-stone-300">
-            <span className="text-sm font-semibold tracking-[-1px] text-white dark:text-stone-950">H</span>
+    <header className="sticky top-0 z-50 border-b border-zinc-200/70 bg-white/86 backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/82">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-6">
+        <Link className="group flex min-w-0 items-center gap-3" href="/">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-zinc-950 text-white shadow-sm dark:bg-white dark:text-zinc-950">
+            <span className="text-sm font-semibold">H</span>
           </div>
-          <div>
-            <div className="text-xl font-semibold tracking-[-0.5px] transition group-hover:opacity-80">Hairth</div>
-            <div className="-mt-1 text-[10px] text-stone-500 dark:text-stone-400">星火</div>
+          <div className="min-w-0">
+            <div className="truncate text-lg font-semibold tracking-normal transition group-hover:text-cyan-600 dark:group-hover:text-cyan-300">
+              {settings.profile.navTitle}
+            </div>
+            <div className="-mt-0.5 truncate text-[10px] text-zinc-500 dark:text-zinc-400">星火数字花园</div>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-9 text-sm font-medium md:flex">
-          {navLinks.map((link) => (
-            <Link className="transition-colors hover:text-stone-600 dark:hover:text-stone-300" href={link.href} key={link.href}>
-              {link.label}
-            </Link>
-          ))}
+        <nav className="hidden items-center gap-7 text-sm font-medium text-zinc-700 dark:text-zinc-200 lg:flex">
+          {navLinks
+            .filter((link) => link.enabled)
+            .map((link) => (
+              <Link className="transition-colors hover:text-cyan-600 dark:hover:text-cyan-300" href={link.href} key={link.href}>
+                {link.label}
+              </Link>
+            ))}
         </nav>
 
-        <div className="flex items-center gap-3">
-          <a className="hidden items-center gap-2 rounded-full border border-stone-300 px-4 py-1.5 text-sm transition hover:bg-stone-50 dark:border-stone-700 dark:hover:bg-stone-900 sm:flex" href="https://github.com/Hairth" rel="noopener noreferrer" target="_blank">
+        <div className="flex items-center gap-2">
+          <a
+            className="hidden h-9 items-center rounded-full border border-zinc-300 px-4 text-sm font-medium transition hover:border-cyan-400 hover:text-cyan-700 dark:border-white/15 dark:hover:border-cyan-300 dark:hover:text-cyan-200 sm:inline-flex"
+            href={settings.profile.githubUrl}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
             GitHub
           </a>
 
-          <button aria-label="切换主题" className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-stone-100 dark:hover:bg-stone-900" onClick={toggleTheme}>
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          <Link
+            aria-label="打开设置"
+            className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-zinc-100 dark:hover:bg-white/10"
+            href="/settings"
+          >
+            <Settings size={18} />
+          </Link>
+
+          <button
+            aria-label="切换主题"
+            className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-zinc-100 dark:hover:bg-white/10"
+            onClick={toggleTheme}
+            type="button"
+          >
+            {isThemeLoaded && isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          <button aria-label="打开菜单" className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-stone-100 dark:hover:bg-stone-900 md:hidden" onClick={() => setIsMenuOpen((open) => !open)}>
+          <button
+            aria-label="打开菜单"
+            className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-white/10 lg:hidden"
+            onClick={() => setIsMenuOpen((open) => !open)}
+            type="button"
+          >
             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
       {isMenuOpen && (
-        <div className="border-t border-stone-200 bg-white px-6 py-4 dark:border-stone-800 dark:bg-[#0a0a0a] md:hidden">
+        <div className="border-t border-zinc-200 bg-white px-5 py-4 dark:border-white/10 dark:bg-zinc-950 lg:hidden">
           <nav className="flex flex-col gap-4 text-sm font-medium">
-            {navLinks.map((link) => (
-              <Link className="py-1 hover:text-stone-600 dark:hover:text-stone-300" href={link.href} key={link.href} onClick={() => setIsMenuOpen(false)}>
-                {link.label}
-              </Link>
-            ))}
-            <a className="py-1" href="https://github.com/Hairth" rel="noopener noreferrer" target="_blank">
-              GitHub →
-            </a>
+            {navLinks
+              .filter((link) => link.enabled)
+              .map((link) => (
+                <Link
+                  className="py-1 hover:text-cyan-600 dark:hover:text-cyan-300"
+                  href={link.href}
+                  key={link.href}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            <Link className="py-1 hover:text-cyan-600 dark:hover:text-cyan-300" href="/settings" onClick={() => setIsMenuOpen(false)}>
+              设置
+            </Link>
           </nav>
         </div>
       )}

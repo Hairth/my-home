@@ -1,8 +1,10 @@
 ﻿import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Noto_Serif_SC } from 'next/font/google';
 import './globals.css';
+import { SettingsProvider } from '@/components/settings/SettingsProvider';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+import { WelcomeSplash } from '@/components/WelcomeSplash';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -47,10 +49,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" className={`${geistSans.variable} ${geistMono.variable} ${notoSerif.variable} h-full antialiased`} suppressHydrationWarning>
-      <body className="min-h-full flex flex-col bg-[#fafaf9] text-stone-900 dark:bg-[#0a0a0a] dark:text-stone-100">
-        <SiteHeader />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
+      <body className="min-h-full flex flex-col bg-[#f6f8fb] text-zinc-900 dark:bg-[#09090b] dark:text-zinc-100">
+        <SettingsProvider>
+          <WelcomeSplash />
+          <SiteHeader />
+          <main className="flex-1">{children}</main>
+          <SiteFooter />
+        </SettingsProvider>
       </body>
     </html>
   );
