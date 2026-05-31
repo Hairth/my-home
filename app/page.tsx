@@ -23,7 +23,7 @@ function WritingCard({ writing }: { writing: Writing }) {
   return (
     <Link
       className="group block rounded-lg border border-zinc-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-cyan-400 hover:shadow-xl hover:shadow-cyan-950/5 dark:border-white/10 dark:bg-zinc-900/72 dark:hover:border-cyan-300/70"
-      href={`/writings/${writing.slug}`}
+      href={`/documents?doc=${encodeURIComponent(writing.slug)}`}
     >
       <div className="mb-4 flex items-center justify-between gap-4 font-mono text-xs text-zinc-500 dark:text-zinc-400">
         <span>{writing.date}</span>
@@ -154,9 +154,9 @@ export default function Home() {
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Link
                 className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-white px-6 text-sm font-semibold text-zinc-950 transition hover:-translate-y-0.5 hover:bg-cyan-50"
-                href="/writings"
+                href="/documents"
               >
-                阅读文章
+                打开文档
                 <ArrowRight aria-hidden="true" size={18} />
               </Link>
             </div>
@@ -179,7 +179,7 @@ export default function Home() {
             <div className="mt-7 grid grid-cols-3 gap-3 text-center">
               <div className="rounded-lg bg-white/12 px-3 py-4">
                 <div className="text-2xl font-semibold">{writings.length}</div>
-                <div className="mt-1 text-xs text-white/60">文章</div>
+                <div className="mt-1 text-xs text-white/60">文档</div>
               </div>
               <div className="rounded-lg bg-white/12 px-3 py-4">
                 <div className="text-2xl font-semibold">{moments.length}</div>
@@ -197,7 +197,7 @@ export default function Home() {
       {settings.modules.dashboard && (
         <section className="border-b border-zinc-200 bg-white py-12 dark:border-white/10 dark:bg-zinc-950">
           <div className="mx-auto grid max-w-7xl gap-4 px-5 sm:px-6 md:grid-cols-4">
-            <ModuleLink href="/writings" icon={<BookOpen size={21} />} summary="按标签和关键词浏览写作记录。" title="文章库" />
+            <ModuleLink href="/documents" icon={<BookOpen size={21} />} summary="创建、上传、编辑和浏览本地文档。" title="文档库" />
             {settings.modules.moments && (
               <ModuleLink href="/moments" icon={<MessageSquarePlus size={21} />} summary="保存短句、状态和当天的小发现。" title="瞬间" />
             )}
@@ -212,13 +212,13 @@ export default function Home() {
       )}
 
       <section className="mx-auto max-w-7xl px-5 py-20 sm:px-6">
-        <SectionHeading eyebrow="WRITINGS" summary="技术实践、生活随笔和长期思考都会沉到这里，后续可以继续接入 Markdown/MDX。" title="文章与笔记" />
+        <SectionHeading eyebrow="DOCUMENTS" summary="Markdown 文档、技术实践、生活随笔和长期思考都会沉到这里。" title="文档与笔记" />
 
         <div className="mb-8 flex flex-col gap-4 lg:flex-row">
           <input
             className="min-h-12 flex-1 rounded-lg border border-zinc-200 bg-white px-5 text-sm placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-900"
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="搜索文章标题、摘要或标签"
+            placeholder="搜索文档标题、摘要或标签"
             type="text"
             value={searchQuery}
           />

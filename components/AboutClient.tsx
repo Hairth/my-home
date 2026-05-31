@@ -48,7 +48,7 @@ export function AboutClient() {
               这里会同时承担个人主页、博客索引、瞬间记录、项目展板和设置中心。它参考了 XinghuisamaBlogs 的动态页面组织方式，也保留了
               jinghuashang 欢迎页的随机图与一言氛围。
             </p>
-            <p>后续可以继续把文章内容接入 MDX、把设置同步到后端，或者把图片 API 扩展成多源轮换。</p>
+            <p>后续可以继续把文档内容接入 MDX、把设置同步到后端，或者把图片 API 扩展成多源轮换。</p>
           </div>
 
           <div className="mt-12 border-t border-zinc-200 pt-8 text-xs text-zinc-400 dark:border-white/10">最后更新：2026-06-01</div>

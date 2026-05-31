@@ -13,8 +13,8 @@ export function SiteFooter() {
           © {new Date().getFullYear()} {settings.profile.authorName} · 星火. 保留所有权利。
         </div>
         <div className="flex flex-wrap gap-6">
-          <Link className="transition hover:text-cyan-700 dark:hover:text-cyan-200" href="/writings">
-            RSS
+          <Link className="transition hover:text-cyan-700 dark:hover:text-cyan-200" href="/documents">
+            文档
           </Link>
           <a
             className="transition hover:text-cyan-700 dark:hover:text-cyan-200"

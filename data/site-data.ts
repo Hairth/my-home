@@ -1,11 +1,17 @@
-export type Writing = {
+export type DocumentItem = {
+  id: string;
   slug: string;
   title: string;
   date: string;
+  updatedAt: string;
   excerpt: string;
   tags: string[];
   readingTime: string;
+  backgroundColor: string;
+  content: string;
 };
+
+export type Writing = DocumentItem;
 
 export type Moment = {
   id: number;
@@ -39,32 +45,83 @@ export type Track = {
   note: string;
 };
 
-export const writings: Writing[] = [
+export const seedDocuments: DocumentItem[] = [
   {
+    id: 'doc-hello-world',
     slug: 'hello-world',
     title: '你好，星火',
     date: '2026-05-28',
+    updatedAt: '2026-06-01',
     excerpt: '从零开始构建一个属于自己的数字花园。记录思考、分享生活、构建未来。',
     tags: ['思考', '起点'],
     readingTime: '3 min',
+    backgroundColor: '#ffffff',
+    content: `# 你好，星火
+
+从零开始构建一个属于自己的数字花园。
+
+这个网站会记录思考，保存生活里的小发现，也会成为长期迭代的个人工作台。
+
+## 为什么要在这里记录
+
+因为文字和代码一样，都值得被认真对待。每一次整理，都会让未来某个时刻的自己少一点混乱，多一点确定。
+
+> 欢迎你来。这里会继续生长。
+`,
   },
   {
+    id: 'doc-on-building',
     slug: 'on-building',
     title: '关于构建',
     date: '2026-05-20',
+    updatedAt: '2026-06-01',
     excerpt: '好的工具应该安静、可靠、值得信赖。代码如此，个人网站也如此。',
     tags: ['工程', '哲学'],
     readingTime: '8 min',
+    backgroundColor: '#f8fafc',
+    content: `# 关于构建
+
+好的工具应该安静、可靠、值得信赖。代码如此，个人网站也如此。
+
+## 工作台感
+
+- 能快速记录
+- 能稳定保存
+- 能按自己的节奏生长
+
+---
+
+这就是这个站点接下来要继续完善的方向。
+`,
   },
   {
+    id: 'doc-japan-vps-notes',
     slug: 'japan-vps-notes',
     title: '日本 VPS 网络调优笔记',
     date: '2026-05-15',
+    updatedAt: '2026-06-01',
     excerpt: '从 Hysteria2 到 Clash Verge 的完整路由实践，以及高延迟环境下的稳定体验。',
     tags: ['网络', 'VPS', '实践'],
     readingTime: '12 min',
+    backgroundColor: '#f0fdfa',
+    content: `# 日本 VPS 网络调优笔记
+
+这是一份用于整理网络环境、代理链路和延迟观察的文档模板。
+
+## 检查列表
+
+- [ ] 记录线路
+- [ ] 记录延迟
+- [ ] 对比不同时间段
+
+\`\`\`bash
+ping example.com
+\`\`\`
+`,
   },
 ];
+
+export const writings = seedDocuments;
 
 export const initialMoments: Moment[] = [
   {
@@ -91,18 +148,18 @@ export const projects: Project[] = [
   {
     id: 'my-home',
     name: 'My Home',
-    description: '配置驱动的个人主页，包含欢迎页、文章、瞬间、项目、友链、音乐和设置中心。',
+    description: '配置驱动的个人主页，包含欢迎页、文档、瞬间、项目、友链、音乐和设置中心。',
     href: 'https://github.com/Hairth/my-home',
     icon: '⌂',
     tags: ['Next.js', 'Tailwind', 'Personal Site'],
   },
   {
     id: 'digital-garden',
-    name: 'Digital Garden Notes',
-    description: '面向长期写作的内容结构实验，后续可以接入 Markdown/MDX 与搜索索引。',
-    href: '/writings',
+    name: 'Digital Garden Docs',
+    description: '面向长期写作的文档结构实验，支持 Markdown 编辑、上传和本地管理。',
+    href: '/documents',
     icon: '✎',
-    tags: ['Writing', 'MDX'],
+    tags: ['Writing', 'Markdown'],
   },
   {
     id: 'visual-settings',

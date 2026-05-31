@@ -25,7 +25,7 @@ export function SiteHeader() {
 
   const navLinks = useMemo(
     () => [
-      { href: '/writings', label: '文章', enabled: true },
+      { href: '/documents', label: '文档', enabled: true },
       { href: '/moments', label: '瞬间', enabled: settings.modules.moments },
       { href: '/projects', label: '项目', enabled: settings.modules.projects },
       { href: '/friends', label: '友链', enabled: settings.modules.friends },
