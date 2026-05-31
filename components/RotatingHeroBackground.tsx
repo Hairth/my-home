@@ -15,6 +15,7 @@ export function RotatingHeroBackground({ className = '', intensity = 'strong' }:
   const [apiSeed, setApiSeed] = useState(1);
 
   const intervalMs = Math.max(3, settings.background.intervalSeconds || 10) * 1000;
+  const overlayOpacity = Math.min(100, Math.max(0, settings.background.overlayOpacity ?? 100)) / 100;
 
   const images = useMemo(() => {
     if (settings.background.mode === 'api' && settings.background.imageApiUrl.trim()) {
@@ -55,6 +56,7 @@ export function RotatingHeroBackground({ className = '', intensity = 'strong' }:
             ? 'absolute inset-0 bg-[linear-gradient(90deg,rgba(8,13,23,0.84),rgba(8,13,23,0.48),rgba(8,13,23,0.16)),linear-gradient(180deg,rgba(8,13,23,0.18),rgba(8,13,23,0.7))]'
             : 'absolute inset-0 bg-[linear-gradient(90deg,rgba(8,13,23,0.62),rgba(8,13,23,0.24)),linear-gradient(180deg,rgba(8,13,23,0.08),rgba(8,13,23,0.44))]'
         }
+        style={{ opacity: overlayOpacity }}
       />
     </div>
   );

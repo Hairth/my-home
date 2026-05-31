@@ -245,6 +245,24 @@ export function SettingsClient() {
                 value={settings.background.intervalSeconds}
               />
             </div>
+            <label className="block rounded-lg border border-zinc-200 p-4 dark:border-white/10">
+              <span className="mb-3 flex items-center justify-between gap-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+                <span>遮罩透明度</span>
+                <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">{settings.background.overlayOpacity}%</span>
+              </span>
+              <input
+                className="w-full accent-cyan-600"
+                max={100}
+                min={0}
+                onChange={(event) => updateBackground('overlayOpacity', Number(event.target.value))}
+                step={5}
+                type="range"
+                value={settings.background.overlayOpacity}
+              />
+              <span className="mt-2 block text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+                数值越低，欢迎页和主页背景图越清晰；数值越高，文字对比越强。
+              </span>
+            </label>
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-200">预设图片 URL</span>
               <textarea
