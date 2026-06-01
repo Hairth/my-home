@@ -44,6 +44,15 @@ const fallbackTracks: Track[] = [
   },
 ];
 
+const PLAYLIST_PAGE_SIZE = 50;
+const VIDEO_DETAIL_BATCH_SIZE = 50;
+const DEFAULT_MAX_TRACKS = 200;
+
+function getMaxTracks() {
+  const rawValue = Number(process.env.YOUTUBE_MUSIC_MAX_TRACKS);
+  return Number.isFinite(rawValue) && rawValue > 0 ? Math.floor(rawValue) : DEFAULT_MAX_TRACKS;
+}
+
 function formatIsoDuration(value?: string) {
   if (!value) return '--:--';
   const match = value.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
@@ -60,6 +69,128 @@ function formatIsoDuration(value?: string) {
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
+function toTrack(
+  item: {
+    contentDetails?: { videoId?: string };
+    id?: string;
+    snippet?: {
+      description?: string;
+      title?: string;
+      videoOwnerChannelTitle?: string;
+      thumbnails?: { high?: { url?: string }; medium?: { url?: string } };
+    };
+  },
+  playlistId: string,
+): Track | null {
+  const videoId = item.contentDetails?.videoId;
+  const title = item.snippet?.title;
+  if (!videoId || !title) return null;
+
+  return {
+    artist: item.snippet?.videoOwnerChannelTitle ?? 'YouTube Music',
+    cover: item.snippet?.thumbnails?.high?.url ?? item.snippet?.thumbnails?.medium?.url ?? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    description: item.snippet?.description ?? '',
+    duration: '--:--',
+    id: item.id ?? videoId,
+    sourceUrl: `https://music.youtube.com/watch?v=${videoId}&list=${playlistId}`,
+    title,
+    videoId,
+  };
+}
+
+async function fetchPlaylistTracks(playlistId: string, apiKey: string) {
+  const tracks: Track[] = [];
+  const maxTracks = getMaxTracks();
+  let pageToken = '';
+
+  while (tracks.length < maxTracks) {
+    const params = new URLSearchParams({
+      key: apiKey,
+      maxResults: String(Math.min(PLAYLIST_PAGE_SIZE, maxTracks - tracks.length)),
+      part: 'snippet,contentDetails',
+      playlistId,
+    });
+
+    if (pageToken) {
+      params.set('pageToken', pageToken);
+    }
+
+    const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?${params.toString()}`, { next: { revalidate: 3600 } });
+
+    if (!response.ok) {
+      break;
+    }
+
+    const data = (await response.json()) as {
+      items?: Parameters<typeof toTrack>[0][];
+      nextPageToken?: string;
+    };
+
+    for (const item of data.items ?? []) {
+      const track = toTrack(item, playlistId);
+      if (track) {
+        tracks.push(track);
+      }
+    }
+
+    if (!data.nextPageToken) {
+      break;
+    }
+
+    pageToken = data.nextPageToken;
+  }
+
+  return tracks;
+}
+
+function chunk<T>(items: T[], size: number) {
+  const chunks: T[][] = [];
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+  return chunks;
+}
+
+async function fetchVideoDetails(tracks: Track[], apiKey: string) {
+  const videoDetails = new Map<string, { description: string; duration: string }>();
+
+  for (const videoIdBatch of chunk(
+    tracks.map((track) => track.videoId),
+    VIDEO_DETAIL_BATCH_SIZE,
+  )) {
+    const params = new URLSearchParams({
+      id: videoIdBatch.join(','),
+      key: apiKey,
+      part: 'contentDetails,snippet',
+    });
+
+    const videoResponse = await fetch(`https://www.googleapis.com/youtube/v3/videos?${params.toString()}`, { next: { revalidate: 3600 } });
+
+    if (!videoResponse.ok) {
+      continue;
+    }
+
+    const videoData = (await videoResponse.json()) as {
+      items?: Array<{
+        contentDetails?: { duration?: string };
+        id?: string;
+        snippet?: { description?: string };
+      }>;
+    };
+
+    for (const item of videoData.items ?? []) {
+      if (!item.id) continue;
+
+      videoDetails.set(item.id, {
+        description: item.snippet?.description ?? '',
+        duration: formatIsoDuration(item.contentDetails?.duration),
+      });
+    }
+  }
+
+  return videoDetails;
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const playlistId = url.searchParams.get('playlistId') ?? process.env.YOUTUBE_MUSIC_PLAYLIST_ID ?? '';
@@ -67,85 +198,24 @@ export async function GET(request: Request) {
 
   if (playlistId && apiKey) {
     try {
-      const response = await fetch(
-        `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=12&playlistId=${encodeURIComponent(playlistId)}&key=${encodeURIComponent(apiKey)}`,
-        { next: { revalidate: 3600 } },
-      );
+      const tracks = await fetchPlaylistTracks(playlistId, apiKey);
 
-      if (response.ok) {
-        const data = (await response.json()) as {
-          items?: Array<{
-            contentDetails?: { videoId?: string };
-            id?: string;
-            snippet?: {
-              description?: string;
-              title?: string;
-              videoOwnerChannelTitle?: string;
-              thumbnails?: { high?: { url?: string }; medium?: { url?: string } };
-            };
-          }>;
-        };
+      if (tracks.length > 0) {
+        const videoDetails = await fetchVideoDetails(tracks, apiKey);
 
-        const tracks = (data.items ?? [])
-          .map((item): Track | null => {
-            const videoId = item.contentDetails?.videoId;
-            const title = item.snippet?.title;
-            if (!videoId || !title) return null;
-
+        return NextResponse.json({
+          maxTracks: getMaxTracks(),
+          playlistId,
+          source: 'youtube-data-api',
+          tracks: tracks.map((track) => {
+            const details = videoDetails.get(track.videoId);
             return {
-              artist: item.snippet?.videoOwnerChannelTitle ?? 'YouTube Music',
-              cover: item.snippet?.thumbnails?.high?.url ?? item.snippet?.thumbnails?.medium?.url ?? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-              description: item.snippet?.description ?? '',
-              duration: '--:--',
-              id: item.id ?? videoId,
-              sourceUrl: `https://music.youtube.com/watch?v=${videoId}&list=${playlistId}`,
-              title,
-              videoId,
+              ...track,
+              description: details?.description || track.description,
+              duration: details?.duration ?? track.duration,
             };
-          })
-          .filter((track): track is Track => Boolean(track));
-
-        if (tracks.length > 0) {
-          const videoIds = tracks.map((track) => track.videoId).join(',');
-          const videoResponse = await fetch(
-            `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${encodeURIComponent(videoIds)}&key=${encodeURIComponent(apiKey)}`,
-            { next: { revalidate: 3600 } },
-          );
-
-          if (videoResponse.ok) {
-            const videoData = (await videoResponse.json()) as {
-              items?: Array<{
-                contentDetails?: { duration?: string };
-                id?: string;
-                snippet?: { description?: string };
-              }>;
-            };
-            const videoDetails = new Map(
-              (videoData.items ?? []).map((item) => [
-                item.id,
-                {
-                  description: item.snippet?.description ?? '',
-                  duration: formatIsoDuration(item.contentDetails?.duration),
-                },
-              ]),
-            );
-
-            return NextResponse.json({
-              playlistId,
-              source: 'youtube-data-api',
-              tracks: tracks.map((track) => {
-                const details = videoDetails.get(track.videoId);
-                return {
-                  ...track,
-                  description: details?.description || track.description,
-                  duration: details?.duration ?? track.duration,
-                };
-              }),
-            });
-          }
-
-          return NextResponse.json({ playlistId, source: 'youtube-data-api', tracks });
-        }
+          }),
+        });
       }
     } catch {
       // Fall back to the curated client-safe list below.
