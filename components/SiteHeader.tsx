@@ -90,13 +90,13 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-6">
         <Link className="group flex min-w-0 items-center gap-3" href="/">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/12 text-white shadow-sm ring-1 ring-white/15">
-            <span className="text-sm font-semibold">H</span>
+            <span className="text-sm font-semibold">{settings.brand.logoText.slice(0, 2) || settings.profile.navTitle.slice(0, 1) || 'H'}</span>
           </div>
           <div className="min-w-0">
             <div className="truncate text-lg font-semibold tracking-normal transition group-hover:text-cyan-600 dark:group-hover:text-cyan-300">
               {settings.profile.navTitle}
             </div>
-            <div className="-mt-0.5 truncate text-[10px] text-white/45">星火数字花园</div>
+            <div className="-mt-0.5 truncate text-[10px] text-white/45">{settings.brand.navSubtitle}</div>
           </div>
         </Link>
 

@@ -4,17 +4,16 @@ import Link from 'next/link';
 import {
   BookOpen,
   Camera,
-  Clock3,
   FolderKanban,
   Mail,
   Monitor,
-  Moon,
   Search,
   Users,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { YoutubeMusicPlayer } from '@/components/music/YoutubeMusicPlayer';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
+import { WeatherCard } from '@/components/weather/WeatherCard';
 import { projects, writings } from '@/data/site-data';
 
 function GlassCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -62,17 +61,6 @@ function FeaturePoster({
 export default function Home() {
   const { settings } = useSiteSettings();
   const [query, setQuery] = useState('');
-  const [now, setNow] = useState('');
-
-  useEffect(() => {
-    function updateClock() {
-      setNow(new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date()));
-    }
-
-    updateClock();
-    const timer = window.setInterval(updateClock, 1000);
-    return () => window.clearInterval(timer);
-  }, []);
 
   const searchResults = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -167,18 +155,11 @@ export default function Home() {
               title="正在构建的工具"
             />
 
-            <Link className="glass-panel flex min-h-44 flex-col items-center justify-center p-7 text-center transition hover:-translate-y-1 hover:border-indigo-300/35" href="/settings">
-              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500/30 text-indigo-100 shadow-[0_0_28px_rgba(99,102,241,0.32)]">
-                <Moon size={28} />
-              </div>
-              <h3 className="adaptive-text text-xl font-black">夜间模式</h3>
-              <p className="adaptive-subtle mt-2 text-xs font-semibold">背景模糊与遮罩可调</p>
-            </Link>
+            <WeatherCard />
           </div>
         </div>
 
-        <GlassCard className="grid items-center gap-5 px-6 py-5 md:grid-cols-[160px_1fr_auto]">
-          <div className="adaptive-text font-mono text-3xl font-black tracking-widest">{now}</div>
+        <GlassCard className="grid items-center gap-5 px-6 py-5 md:grid-cols-[1fr_auto]">
           <div className="adaptive-muted flex flex-wrap items-center gap-3 text-xs font-bold">
             <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.75)]" />
             系统已稳定运行
@@ -203,7 +184,6 @@ export default function Home() {
         </GlassCard>
 
         <div className="adaptive-subtle flex justify-center text-xs font-semibold">
-          <Clock3 className="mr-2" size={15} />
           工作进度同步到 Hairth/my-home
         </div>
       </div>

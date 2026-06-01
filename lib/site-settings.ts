@@ -1,6 +1,16 @@
 export type ImageSourceMode = 'preset' | 'api';
 
 export type SiteSettings = {
+  brand: {
+    logoText: string;
+    navSubtitle: string;
+    footerCopyright: string;
+    footerDocumentsLabel: string;
+    footerSourceLabel: string;
+    footerSourceUrl: string;
+    footerContactLabel: string;
+    footerSlogan: string;
+  };
   profile: {
     siteTitle: string;
     navTitle: string;
@@ -42,6 +52,16 @@ export type SiteSettings = {
 export const SETTINGS_STORAGE_KEY = 'my-home:site-settings:v1';
 
 export const defaultSiteSettings: SiteSettings = {
+  brand: {
+    logoText: 'H',
+    navSubtitle: '星火数字花园',
+    footerCopyright: '© {year} {siteTitle}, 保留所有权利。',
+    footerDocumentsLabel: '文档',
+    footerSourceLabel: 'Source',
+    footerSourceUrl: 'https://github.com/Hairth/my-home',
+    footerContactLabel: '联系',
+    footerSlogan: '用心构建的数字花园',
+  },
   profile: {
     siteTitle: 'Hairth · 星火',
     navTitle: 'Hairth',

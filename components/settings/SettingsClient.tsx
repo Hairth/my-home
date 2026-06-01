@@ -95,6 +95,13 @@ export function SettingsClient() {
     }));
   }
 
+  function updateBrand<Key extends keyof SiteSettings['brand']>(key: Key, value: SiteSettings['brand'][Key]) {
+    setSettings((current) => ({
+      ...current,
+      brand: { ...current.brand, [key]: value },
+    }));
+  }
+
   function updateWelcome<Key extends keyof SiteSettings['welcome']>(key: Key, value: SiteSettings['welcome'][Key]) {
     setSettings((current) => ({
       ...current,
@@ -176,6 +183,8 @@ export function SettingsClient() {
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="站点标题" onChange={(value) => updateProfile('siteTitle', value)} value={settings.profile.siteTitle} />
               <Field label="导航标题" onChange={(value) => updateProfile('navTitle', value)} value={settings.profile.navTitle} />
+              <Field label="左上角圆标" onChange={(value) => updateBrand('logoText', value.slice(0, 2))} value={settings.brand.logoText} />
+              <Field label="导航副标题" onChange={(value) => updateBrand('navSubtitle', value)} value={settings.brand.navSubtitle} />
               <Field label="作者名称" onChange={(value) => updateProfile('authorName', value)} value={settings.profile.authorName} />
               <Field label="位置" onChange={(value) => updateProfile('location', value)} value={settings.profile.location} />
               <Field label="邮箱" onChange={(value) => updateProfile('email', value)} type="email" value={settings.profile.email} />
@@ -191,6 +200,22 @@ export function SettingsClient() {
               />
             </label>
             <Field label="主页标语" onChange={(value) => updateProfile('tagline', value)} value={settings.profile.tagline} />
+          </Panel>
+
+          <Panel icon={<Settings2 size={20} />} title="页脚与站点文字">
+            <Field
+              label="页脚版权"
+              onChange={(value) => updateBrand('footerCopyright', value)}
+              placeholder="可用 {year}、{siteTitle}、{authorName}"
+              value={settings.brand.footerCopyright}
+            />
+            <div className="grid gap-4 md:grid-cols-3">
+              <Field label="文档链接文字" onChange={(value) => updateBrand('footerDocumentsLabel', value)} value={settings.brand.footerDocumentsLabel} />
+              <Field label="Source 文字" onChange={(value) => updateBrand('footerSourceLabel', value)} value={settings.brand.footerSourceLabel} />
+              <Field label="联系文字" onChange={(value) => updateBrand('footerContactLabel', value)} value={settings.brand.footerContactLabel} />
+            </div>
+            <Field label="Source 链接" onChange={(value) => updateBrand('footerSourceUrl', value)} type="url" value={settings.brand.footerSourceUrl} />
+            <Field label="页脚右侧文案" onChange={(value) => updateBrand('footerSlogan', value)} value={settings.brand.footerSlogan} />
           </Panel>
 
           <Panel icon={<Sparkles size={20} />} title="欢迎页">
