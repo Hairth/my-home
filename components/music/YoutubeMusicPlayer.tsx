@@ -369,7 +369,7 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
   );
 
   const playerEngine = (
-    <div aria-hidden="true" className="pointer-events-none absolute -left-[9999px] top-0 h-[240px] w-[320px] overflow-hidden opacity-0">
+    <div aria-hidden="true" className="pointer-events-none !absolute -left-[9999px] top-0 h-[240px] w-[320px] overflow-hidden opacity-0">
       <div className="h-full w-full" id={playerElementId} />
     </div>
   );
@@ -397,10 +397,10 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
 
   if (compact) {
     return (
-      <section className="glass-panel overflow-hidden p-5">
+      <section className="glass-panel overflow-hidden p-4 md:p-5">
         <div className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
-            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-white/30 bg-white/15 shadow-[0_0_28px_rgba(99,102,241,0.28)]">
+            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border border-white/30 bg-white/15 shadow-[0_0_28px_rgba(99,102,241,0.28)] md:h-16 md:w-16">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img alt={activeTrack.title} className={`h-full w-full object-cover ${isPlaying ? 'animate-spin-slow' : ''}`} src={activeTrack.cover} />
               <span className="absolute inset-0 m-auto h-5 w-5 rounded-full bg-slate-950/85 ring-2 ring-white/60" />
@@ -424,7 +424,7 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
           </a>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-4">
           <div className="mb-2 flex items-center justify-between text-[11px] font-semibold text-white/52">
             <span>{formatTime(currentTime)}</span>
             <span>{duration > 0 ? formatTime(duration) : activeTrack.duration}</span>
@@ -440,13 +440,13 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
             value={progressValue}
           />
 
-          <div className="mt-5 flex items-center justify-center gap-5">
+          <div className="mt-4 flex items-center justify-center gap-4">
             <button aria-label="上一首" className="text-white/70 transition hover:text-white" onClick={() => selectByOffset(-1)} type="button">
               <SkipBack fill="currentColor" size={22} />
             </button>
             <button
               aria-label={isPlaying ? '暂停' : '播放'}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-500 text-white shadow-[0_0_28px_rgba(99,102,241,0.55)] transition hover:scale-105"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500 text-white shadow-[0_0_28px_rgba(99,102,241,0.55)] transition hover:scale-105 md:h-14 md:w-14"
               onClick={togglePlayback}
               type="button"
             >
@@ -461,7 +461,7 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
 
         {playerEngine}
 
-        <div className="mt-5 flex items-center gap-2 text-xs font-semibold text-white/44">
+        <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-white/44">
           <Disc3 size={14} />
           {playerMessage}
         </div>

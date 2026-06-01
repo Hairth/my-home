@@ -115,7 +115,7 @@ export default function Home() {
           )}
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-12">
+        <div className="grid items-start gap-5 lg:grid-cols-12">
           <GlassCard className="lg:col-span-7">
             <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-start sm:justify-between md:p-8">
               <div className="flex min-w-0 gap-5">
