@@ -187,6 +187,8 @@ export function PersistentYoutubeMusicProvider({ children }: { children: React.R
   const playerStateRef = useRef<YoutubePlayerState | null>(null);
   const isPlayerReadyRef = useRef(false);
   const loadedVideoIdRef = useRef(fallbackTracks[0].videoId);
+  const tracksRef = useRef(tracks);
+  const activeIdRef = useRef(activeId);
   const rawPlayerId = useId();
   const playerElementId = `persistent-youtube-player-${rawPlayerId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
@@ -194,9 +196,37 @@ export function PersistentYoutubeMusicProvider({ children }: { children: React.R
   const activeIndex = Math.max(0, tracks.findIndex((track) => track.id === activeTrack.id));
   const playlistId = settings.music.youtubePlaylistId.trim();
 
+  useEffect(() => {
+    tracksRef.current = tracks;
+  }, [tracks]);
+
+  useEffect(() => {
+    activeIdRef.current = activeId;
+  }, [activeId]);
+
+  const playNextTrackFromEnded = useCallback((player: YoutubePlayer) => {
+    const currentTracks = tracksRef.current;
+    if (currentTracks.length === 0) return;
+
+    const currentIndex = Math.max(0, currentTracks.findIndex((track) => track.id === activeIdRef.current));
+    const nextTrack = currentTracks[(currentIndex + 1) % currentTracks.length] ?? currentTracks[0];
+
+    activeIdRef.current = nextTrack.id;
+    loadedVideoIdRef.current = nextTrack.videoId;
+    setActiveId(nextTrack.id);
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(true);
+    setPlayerMessage('正在自动播放下一首。');
+    player.unMute();
+    player.setVolume(90);
+    player.loadVideoById(nextTrack.videoId);
+  }, []);
+
   const cueTrack = useCallback((track: YoutubeMusicTrack) => {
     const player = playerRef.current;
     if (!player || !isPlayerReadyRef.current) return;
+    activeIdRef.current = track.id;
     player.cueVideoById(track.videoId);
     loadedVideoIdRef.current = track.videoId;
     setCurrentTime(0);
@@ -206,6 +236,7 @@ export function PersistentYoutubeMusicProvider({ children }: { children: React.R
   const playTrack = useCallback((track: YoutubeMusicTrack) => {
     const player = playerRef.current;
     if (!player || !isPlayerReadyRef.current) return;
+    activeIdRef.current = track.id;
     player.unMute();
     player.setVolume(90);
     player.loadVideoById(track.videoId);
@@ -325,7 +356,11 @@ export function PersistentYoutubeMusicProvider({ children }: { children: React.R
               if (event.data === playerState.PLAYING) {
                 setIsPlaying(true);
               }
-              if ([playerState.PAUSED, playerState.CUED, playerState.ENDED].includes(event.data)) {
+              if (event.data === playerState.ENDED) {
+                playNextTrackFromEnded(event.target);
+                return;
+              }
+              if ([playerState.PAUSED, playerState.CUED].includes(event.data)) {
                 setIsPlaying(false);
               }
             },
@@ -339,7 +374,7 @@ export function PersistentYoutubeMusicProvider({ children }: { children: React.R
     return () => {
       disposed = true;
     };
-  }, [activeTrack.videoId, playerElementId]);
+  }, [activeTrack.videoId, playerElementId, playNextTrackFromEnded]);
 
   useEffect(() => {
     const player = playerRef.current;
