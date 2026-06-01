@@ -5,6 +5,7 @@ import {
   Download,
   Eye,
   Image as ImageIcon,
+  Music2,
   RotateCcw,
   Save,
   Settings2,
@@ -21,7 +22,7 @@ import { mergeSiteSettings, normalizeImageLines, SETTINGS_STORAGE_KEY, type Site
 
 function Panel({ children, icon, title }: { children: ReactNode; icon: ReactNode; title: string }) {
   return (
-    <section className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-white/10 dark:bg-zinc-900 md:p-6">
+    <section className="rounded-lg border border-zinc-200 bg-white p-5 text-zinc-950 shadow-xl shadow-slate-950/10 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100 md:p-6">
       <div className="mb-6 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">{icon}</div>
         <h2 className="text-xl font-semibold">{title}</h2>
@@ -48,7 +49,7 @@ function Field({
     <label className="block">
       <span className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-200">{label}</span>
       <input
-        className="min-h-11 w-full rounded-lg border border-zinc-200 bg-white px-4 text-sm placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950"
+        className="min-h-11 w-full rounded-lg border border-zinc-200 bg-white px-4 text-sm text-zinc-950 placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         type={type}
@@ -115,6 +116,13 @@ export function SettingsClient() {
     }));
   }
 
+  function updateMusic<Key extends keyof SiteSettings['music']>(key: Key, value: SiteSettings['music'][Key]) {
+    setSettings((current) => ({
+      ...current,
+      music: { ...current.music, [key]: value },
+    }));
+  }
+
   async function copySettings() {
     await navigator.clipboard.writeText(exportedJson);
     setStatus('设置 JSON 已复制。');
@@ -152,12 +160,12 @@ export function SettingsClient() {
     <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6">
       <div className="mb-10 flex flex-col gap-6 border-b border-zinc-200 pb-10 dark:border-white/10 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-5xl font-semibold tracking-normal md:text-6xl">设置</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">
+          <h1 className="text-5xl font-semibold tracking-normal text-white md:text-6xl">设置</h1>
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-white/72">
             欢迎词、图片轮换 API、主页模块和个人资料都会实时写入本地配置。
           </p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-600 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-300">
+        <div className="rounded-lg border border-white/10 bg-zinc-950/82 px-4 py-3 text-sm text-white/82 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
           {status}
         </div>
       </div>
@@ -177,7 +185,7 @@ export function SettingsClient() {
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-200">简介</span>
               <textarea
-                className="min-h-28 w-full rounded-lg border border-zinc-200 bg-white p-4 text-sm leading-7 placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950"
+                className="min-h-28 w-full rounded-lg border border-zinc-200 bg-white p-4 text-sm leading-7 text-zinc-950 placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                 onChange={(event) => updateProfile('bio', event.target.value)}
                 value={settings.profile.bio}
               />
@@ -284,7 +292,7 @@ export function SettingsClient() {
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-200">预设图片 URL</span>
               <textarea
-                className="min-h-36 w-full rounded-lg border border-zinc-200 bg-white p-4 font-mono text-xs leading-6 placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950"
+                className="min-h-36 w-full rounded-lg border border-zinc-200 bg-white p-4 font-mono text-xs leading-6 text-zinc-950 placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                 onChange={(event) => updateBackground('images', normalizeImageLines(event.target.value))}
                 value={settings.background.images.join('\n')}
               />
@@ -300,10 +308,22 @@ export function SettingsClient() {
               <Toggle checked={settings.modules.music} label="音乐" onChange={(checked) => updateModule('music', checked)} />
             </div>
           </Panel>
+
+          <Panel icon={<Music2 size={20} />} title="音乐 API">
+            <Field
+              label="YouTube 播放列表 ID"
+              onChange={(value) => updateMusic('youtubePlaylistId', value.trim())}
+              placeholder="PLxxxxxxxxxxxxxxxx"
+              value={settings.music.youtubePlaylistId}
+            />
+            <div className="rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm leading-6 text-cyan-950 dark:border-cyan-300/20 dark:bg-cyan-300/10 dark:text-cyan-100">
+              API Key 会读取服务器环境变量 YOUTUBE_DATA_API_KEY；这里只保存歌单 ID。
+            </div>
+          </Panel>
         </div>
 
         <aside className="space-y-6">
-          <section className="sticky top-24 rounded-lg border border-zinc-200 bg-white p-5 dark:border-white/10 dark:bg-zinc-900">
+          <section className="sticky top-24 rounded-lg border border-zinc-200 bg-white p-5 text-zinc-950 shadow-xl shadow-slate-950/10 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100">
             <div className="mb-5 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
                 <Settings2 size={20} />
@@ -331,7 +351,7 @@ export function SettingsClient() {
                 复制 JSON
               </button>
               <button
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 text-sm font-semibold transition hover:border-cyan-400 hover:text-cyan-700 dark:border-white/10 dark:hover:border-cyan-300 dark:hover:text-cyan-200"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 text-sm font-semibold text-zinc-700 transition hover:border-cyan-400 hover:text-cyan-700 dark:border-white/10 dark:text-zinc-100 dark:hover:border-cyan-300 dark:hover:text-cyan-200"
                 onClick={downloadSettings}
                 type="button"
               >
@@ -339,7 +359,7 @@ export function SettingsClient() {
                 导出设置
               </button>
               <button
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 text-sm font-semibold transition hover:border-rose-400 hover:text-rose-600 dark:border-white/10 dark:hover:border-rose-300 dark:hover:text-rose-200"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 text-sm font-semibold text-zinc-700 transition hover:border-rose-400 hover:text-rose-600 dark:border-white/10 dark:text-zinc-100 dark:hover:border-rose-300 dark:hover:text-rose-200"
                 onClick={() => {
                   resetSettings();
                   setStatus('设置已恢复默认值。');
@@ -352,13 +372,13 @@ export function SettingsClient() {
             </div>
           </section>
 
-          <section className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-white/10 dark:bg-zinc-900">
+          <section className="rounded-lg border border-zinc-200 bg-white p-5 text-zinc-950 shadow-xl shadow-slate-950/10 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100">
             <div className="mb-4 flex items-center gap-3">
               <Upload aria-hidden="true" size={20} />
               <h2 className="text-xl font-semibold">导入</h2>
             </div>
             <textarea
-              className="min-h-40 w-full rounded-lg border border-zinc-200 bg-white p-4 font-mono text-xs leading-6 placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950"
+              className="min-h-40 w-full rounded-lg border border-zinc-200 bg-white p-4 font-mono text-xs leading-6 text-zinc-950 placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
               onChange={(event) => setImportText(event.target.value)}
               placeholder="粘贴设置 JSON"
               value={importText}
@@ -374,7 +394,7 @@ export function SettingsClient() {
                 导入
               </button>
               <button
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 text-sm font-semibold transition hover:border-zinc-400 dark:border-white/10"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 text-sm font-semibold text-zinc-700 transition hover:border-zinc-400 dark:border-white/10 dark:text-zinc-100"
                 onClick={() => setImportText('')}
                 type="button"
               >

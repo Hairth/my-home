@@ -35,6 +35,9 @@ export type SiteSettings = {
     music: boolean;
     dashboard: boolean;
   };
+  music: {
+    youtubePlaylistId: string;
+  };
 };
 
 export const SETTINGS_STORAGE_KEY = 'my-home:site-settings:v1';
@@ -77,6 +80,9 @@ export const defaultSiteSettings: SiteSettings = {
     friends: true,
     music: true,
     dashboard: true,
+  },
+  music: {
+    youtubePlaylistId: '',
   },
 };
 

@@ -2,6 +2,7 @@
 
 import { Disc3, ExternalLink, ListMusic, Pause, Play, SkipBack, SkipForward, Volume2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { useSiteSettings } from '@/components/settings/SettingsProvider';
 
 export type YoutubeMusicTrack = {
   artist: string;
@@ -36,6 +37,7 @@ const fallbackTracks: YoutubeMusicTrack[] = [
 ];
 
 export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps) {
+  const { isLoaded, settings } = useSiteSettings();
   const [tracks, setTracks] = useState<YoutubeMusicTrack[]>(fallbackTracks);
   const [activeId, setActiveId] = useState(fallbackTracks[0].id);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -43,11 +45,15 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
 
   const activeTrack = useMemo(() => tracks.find((track) => track.id === activeId) ?? tracks[0], [activeId, tracks]);
   const activeIndex = Math.max(0, tracks.findIndex((track) => track.id === activeTrack.id));
+  const playlistId = settings.music.youtubePlaylistId.trim();
 
   useEffect(() => {
-    let cancelled = false;
+    if (!isLoaded) return undefined;
 
-    fetch('/api/youtube-music', { cache: 'no-store' })
+    let cancelled = false;
+    const requestUrl = playlistId ? `/api/youtube-music?playlistId=${encodeURIComponent(playlistId)}` : '/api/youtube-music';
+
+    fetch(requestUrl, { cache: 'no-store' })
       .then((response) => response.json() as Promise<YoutubeMusicResponse>)
       .then((data) => {
         if (cancelled || !Array.isArray(data.tracks) || data.tracks.length === 0) return;
@@ -62,7 +68,7 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isLoaded, playlistId]);
 
   function selectByOffset(offset: number) {
     const nextIndex = (activeIndex + offset + tracks.length) % tracks.length;

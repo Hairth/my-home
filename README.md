@@ -16,6 +16,19 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## YouTube Music
+
+The site reads YouTube recommendations from the server endpoint at `/api/youtube-music`.
+
+Create a local `.env.local` file when you want to use your own YouTube Data API project:
+
+```env
+YOUTUBE_DATA_API_KEY=your_google_cloud_youtube_data_api_key
+YOUTUBE_MUSIC_PLAYLIST_ID=your_default_youtube_playlist_id
+```
+
+`YOUTUBE_DATA_API_KEY` must stay on the server and should not be pasted into the browser settings page. The settings page only stores the public playlist ID, so you can switch playlists without exposing the key.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
