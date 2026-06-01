@@ -1,35 +1,11 @@
 'use client';
 
-import {
-  Disc3,
-  ExternalLink,
-  FileText,
-  ListMusic,
-  Pause,
-  Play,
-  SkipBack,
-  SkipForward,
-  Volume2,
-} from 'lucide-react';
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { useSiteSettings } from '@/components/settings/SettingsProvider';
+import { Disc3, ExternalLink, FileText, ListMusic, Pause, Play, SkipBack, SkipForward, Volume2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { formatTime, getDescriptionLines, useYoutubeMusic } from '@/components/music/YoutubeMusicProvider';
+import type { YoutubeMusicTrack } from '@/components/music/YoutubeMusicProvider';
 
-export type YoutubeMusicTrack = {
-  artist: string;
-  cover: string;
-  description: string;
-  duration: string;
-  id: string;
-  sourceUrl: string;
-  title: string;
-  videoId: string;
-};
-
-type YoutubeMusicResponse = {
-  playlistId: string;
-  source: string;
-  tracks: YoutubeMusicTrack[];
-};
+export type { YoutubeMusicTrack } from '@/components/music/YoutubeMusicProvider';
 
 type YoutubeMusicPlayerProps = {
   compact?: boolean;
@@ -37,342 +13,37 @@ type YoutubeMusicPlayerProps = {
 
 type PanelTab = 'lyrics' | 'playlist';
 
-type YoutubePlayerState = {
-  BUFFERING: number;
-  CUED: number;
-  ENDED: number;
-  PAUSED: number;
-  PLAYING: number;
-  UNSTARTED: number;
-};
-
-type YoutubePlayer = {
-  cueVideoById: (videoId: string) => void;
-  destroy: () => void;
-  getCurrentTime: () => number;
-  getDuration: () => number;
-  getPlayerState: () => number;
-  loadVideoById: (videoId: string) => void;
-  pauseVideo: () => void;
-  playVideo: () => void;
-  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
-  setVolume: (volume: number) => void;
-  unMute: () => void;
-};
-
-type YoutubeEvent = {
-  data: number;
-  target: YoutubePlayer;
-};
-
-type YoutubeApi = {
-  Player: new (
-    elementId: string,
-    options: {
-      events: {
-        onReady: (event: YoutubeEvent) => void;
-        onStateChange: (event: YoutubeEvent) => void;
-      };
-      height: string;
-      host?: string;
-      playerVars: Record<string, string | number>;
-      videoId: string;
-      width: string;
-    },
-  ) => YoutubePlayer;
-  PlayerState: YoutubePlayerState;
-};
-
-declare global {
-  interface Window {
-    YT?: YoutubeApi;
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
-
-const fallbackTracks: YoutubeMusicTrack[] = [
-  {
-    artist: 'YouTube Music',
-    cover: 'https://i.ytimg.com/vi/5qap5aO4i9A/hqdefault.jpg',
-    description: 'Fallback playlist item. Add YouTube Data API credentials to load your own playlist.',
-    duration: 'LIVE',
-    id: 'lofi-radio',
-    sourceUrl: 'https://music.youtube.com/watch?v=5qap5aO4i9A',
-    title: 'lofi hip hop radio',
-    videoId: '5qap5aO4i9A',
-  },
-];
-
-let youtubeApiPromise: Promise<YoutubeApi> | null = null;
-
-function loadYoutubeApi() {
-  if (typeof window === 'undefined') {
-    return Promise.reject(new Error('YouTube player only runs in the browser.'));
-  }
-
-  if (window.YT?.Player) {
-    return Promise.resolve(window.YT);
-  }
-
-  if (youtubeApiPromise) return youtubeApiPromise;
-
-  youtubeApiPromise = new Promise<YoutubeApi>((resolve, reject) => {
-    const previousReady = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => {
-      previousReady?.();
-      if (window.YT?.Player) {
-        resolve(window.YT);
-      } else {
-        reject(new Error('YouTube iframe API loaded without Player.'));
-      }
-    };
-
-    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
-      const script = document.createElement('script');
-      script.src = 'https://www.youtube.com/iframe_api';
-      script.async = true;
-      script.onerror = () => reject(new Error('Failed to load YouTube iframe API.'));
-      document.head.appendChild(script);
-    }
-  });
-
-  return youtubeApiPromise;
-}
-
-function formatTime(seconds: number) {
-  if (!Number.isFinite(seconds) || seconds <= 0) return '00:00';
-  const rounded = Math.floor(seconds);
-  const hours = Math.floor(rounded / 3600);
-  const minutes = Math.floor((rounded % 3600) / 60);
-  const restSeconds = rounded % 60;
-
-  if (hours > 0) {
-    return `${hours}:${String(minutes).padStart(2, '0')}:${String(restSeconds).padStart(2, '0')}`;
-  }
-
-  return `${String(minutes).padStart(2, '0')}:${String(restSeconds).padStart(2, '0')}`;
-}
-
-function getDescriptionLines(track: YoutubeMusicTrack) {
-  const description = track.description
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((line) => !/^https?:\/\//i.test(line))
-    .filter((line) => !/^#/.test(line))
-    .slice(0, 18);
-
-  if (description.length > 0) return description;
-
-  return [
-    'YouTube Data API 没有提供歌词字段。',
-    '这里会优先显示视频描述；如果视频描述里有歌词，就会在这里出现。',
-    `当前曲目：${track.title}`,
-  ];
-}
-
 export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps) {
-  const { isLoaded, settings } = useSiteSettings();
-  const [tracks, setTracks] = useState<YoutubeMusicTrack[]>(fallbackTracks);
-  const [activeId, setActiveId] = useState(fallbackTracks[0].id);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isPlayerReady, setIsPlayerReady] = useState(false);
-  const [source, setSource] = useState('fallback');
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const {
+    activeTrack,
+    currentTime,
+    duration,
+    isPlayerReady,
+    isPlaying,
+    playerMessage,
+    seekTo,
+    selectByOffset,
+    selectTrack,
+    source,
+    togglePlayback,
+    tracks,
+  } = useYoutubeMusic();
   const [activeTab, setActiveTab] = useState<PanelTab>('lyrics');
-  const [playerMessage, setPlayerMessage] = useState('播放器加载中');
 
-  const playerRef = useRef<YoutubePlayer | null>(null);
-  const playerStateRef = useRef<YoutubePlayerState | null>(null);
-  const isPlayerReadyRef = useRef(false);
-  const loadedVideoIdRef = useRef(fallbackTracks[0].videoId);
-  const rawPlayerId = useId();
-  const playerElementId = `youtube-player-${rawPlayerId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
-
-  const activeTrack = useMemo(() => tracks.find((track) => track.id === activeId) ?? tracks[0], [activeId, tracks]);
-  const activeIndex = Math.max(0, tracks.findIndex((track) => track.id === activeTrack.id));
-  const playlistId = settings.music.youtubePlaylistId.trim();
   const descriptionLines = useMemo(() => getDescriptionLines(activeTrack), [activeTrack]);
   const progressMax = duration > 0 ? duration : 100;
   const progressValue = duration > 0 ? Math.min(currentTime, duration) : 0;
 
-  function cueTrack(track: YoutubeMusicTrack) {
-    const player = playerRef.current;
-    if (!player || !isPlayerReadyRef.current) return;
-    player.cueVideoById(track.videoId);
-    loadedVideoIdRef.current = track.videoId;
-    setCurrentTime(0);
-    setIsPlaying(false);
-  }
-
-  function playTrack(track: YoutubeMusicTrack) {
-    const player = playerRef.current;
-    if (!player || !isPlayerReadyRef.current) return;
-    player.unMute();
-    player.setVolume(90);
-    player.loadVideoById(track.videoId);
-    loadedVideoIdRef.current = track.videoId;
-    setCurrentTime(0);
-    setIsPlaying(true);
-  }
-
-  function selectTrack(track: YoutubeMusicTrack, shouldPlay = true) {
-    setActiveId(track.id);
-    setActiveTab(compact ? activeTab : 'lyrics');
-    if (shouldPlay) {
-      playTrack(track);
-    } else {
-      cueTrack(track);
+  function handleSelectTrack(track: YoutubeMusicTrack, shouldPlay = true) {
+    selectTrack(track, shouldPlay);
+    if (!compact) {
+      setActiveTab('lyrics');
     }
   }
 
-  function selectByOffset(offset: number) {
-    const nextIndex = (activeIndex + offset + tracks.length) % tracks.length;
-    selectTrack(tracks[nextIndex], isPlaying || !compact);
+  function handleSelectByOffset(offset: number) {
+    selectByOffset(offset, isPlaying || !compact);
   }
-
-  function togglePlayback() {
-    const player = playerRef.current;
-    if (!player || !isPlayerReady) {
-      setPlayerMessage('播放器还在加载，请稍等一下。');
-      return;
-    }
-
-    player.unMute();
-    player.setVolume(90);
-
-    if (isPlaying) {
-      player.pauseVideo();
-      setIsPlaying(false);
-    } else {
-      player.playVideo();
-      setIsPlaying(true);
-    }
-  }
-
-  function seekTo(value: number) {
-    const player = playerRef.current;
-    if (!player || duration <= 0) return;
-    player.seekTo(value, true);
-    setCurrentTime(value);
-  }
-
-  useEffect(() => {
-    if (!isLoaded) return undefined;
-
-    let cancelled = false;
-    const requestUrl = playlistId ? `/api/youtube-music?playlistId=${encodeURIComponent(playlistId)}` : '/api/youtube-music';
-
-    fetch(requestUrl, { cache: 'no-store' })
-      .then((response) => response.json() as Promise<YoutubeMusicResponse>)
-      .then((data) => {
-        if (cancelled || !Array.isArray(data.tracks) || data.tracks.length === 0) return;
-        setTracks(data.tracks);
-        setActiveId(data.tracks[0].id);
-        setSource(data.source);
-        cueTrack(data.tracks[0]);
-      })
-      .catch(() => {
-        if (!cancelled) setSource('fallback');
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isLoaded, playlistId]);
-
-  useEffect(() => {
-    if (!activeTrack.videoId || playerRef.current) return undefined;
-
-    let disposed = false;
-
-    loadYoutubeApi()
-      .then((youtubeApi) => {
-        if (disposed || playerRef.current) return;
-        playerStateRef.current = youtubeApi.PlayerState;
-        playerRef.current = new youtubeApi.Player(playerElementId, {
-          height: '100%',
-          playerVars: {
-            controls: 1,
-            modestbranding: 1,
-            playsinline: 1,
-            rel: 0,
-          },
-          videoId: activeTrack.videoId,
-          width: '100%',
-          events: {
-            onReady: (event) => {
-              event.target.unMute();
-              event.target.setVolume(90);
-              isPlayerReadyRef.current = true;
-              loadedVideoIdRef.current = activeTrack.videoId;
-              setIsPlayerReady(true);
-              setDuration(event.target.getDuration() || 0);
-              setPlayerMessage('播放器已就绪，点击播放会有声音。');
-            },
-            onStateChange: (event) => {
-              const playerState = playerStateRef.current;
-              if (!playerState) return;
-              if (event.data === playerState.PLAYING) {
-                setIsPlaying(true);
-              }
-              if ([playerState.PAUSED, playerState.CUED, playerState.ENDED].includes(event.data)) {
-                setIsPlaying(false);
-              }
-            },
-          },
-        });
-      })
-      .catch(() => {
-        setPlayerMessage('YouTube 播放器加载失败，请刷新页面重试。');
-      });
-
-    return () => {
-      disposed = true;
-    };
-  }, [activeTrack.videoId, playerElementId]);
-
-  useEffect(() => {
-    const player = playerRef.current;
-    if (!player || !isPlayerReady || loadedVideoIdRef.current === activeTrack.videoId) return;
-
-    if (isPlaying) {
-      player.loadVideoById(activeTrack.videoId);
-    } else {
-      player.cueVideoById(activeTrack.videoId);
-    }
-
-    loadedVideoIdRef.current = activeTrack.videoId;
-  }, [activeTrack.videoId, isPlayerReady, isPlaying]);
-
-  useEffect(() => {
-    if (!isPlayerReady) return undefined;
-
-    const timer = window.setInterval(() => {
-      const player = playerRef.current;
-      if (!player) return;
-      setCurrentTime(player.getCurrentTime() || 0);
-      setDuration(player.getDuration() || 0);
-    }, 800);
-
-    return () => window.clearInterval(timer);
-  }, [isPlayerReady]);
-
-  useEffect(
-    () => () => {
-      isPlayerReadyRef.current = false;
-      playerRef.current?.destroy();
-      playerRef.current = null;
-    },
-    [],
-  );
-
-  const playerEngine = (
-    <div aria-hidden="true" className="pointer-events-none !absolute -left-[9999px] top-0 h-[240px] w-[320px] overflow-hidden opacity-0">
-      <div className="h-full w-full" id={playerElementId} />
-    </div>
-  );
 
   const coverPanel = (
     <div className="relative mt-6 overflow-hidden rounded-2xl border border-white/12 bg-slate-950/38 p-5">
@@ -388,9 +59,7 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
         <div className="rounded-full border border-white/12 bg-white/10 px-4 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-100">
           Audio Mode
         </div>
-        <p className="mt-4 max-w-sm text-sm font-semibold leading-6 text-white/62">
-          已隐藏视频画面，只保留音乐播放控制。
-        </p>
+        <p className="mt-4 max-w-sm text-sm font-semibold leading-6 text-white/62">已隐藏视频画面，只保留音乐播放控制。</p>
       </div>
     </div>
   );
@@ -441,7 +110,7 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
           />
 
           <div className="mt-4 flex items-center justify-center gap-4">
-            <button aria-label="上一首" className="text-white/70 transition hover:text-white" onClick={() => selectByOffset(-1)} type="button">
+            <button aria-label="上一首" className="text-white/70 transition hover:text-white" onClick={() => handleSelectByOffset(-1)} type="button">
               <SkipBack fill="currentColor" size={22} />
             </button>
             <button
@@ -452,14 +121,12 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
             >
               {isPlaying ? <Pause fill="currentColor" size={24} /> : <Play className="ml-0.5" fill="currentColor" size={24} />}
             </button>
-            <button aria-label="下一首" className="text-white/70 transition hover:text-white" onClick={() => selectByOffset(1)} type="button">
+            <button aria-label="下一首" className="text-white/70 transition hover:text-white" onClick={() => handleSelectByOffset(1)} type="button">
               <SkipForward fill="currentColor" size={22} />
             </button>
             <Volume2 className="text-white/35" size={20} />
           </div>
         </div>
-
-        {playerEngine}
 
         <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-white/44">
           <Disc3 size={14} />
@@ -517,25 +184,25 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
           </div>
 
           <div className="mt-6 flex items-center justify-center gap-6">
-            <button aria-label="上一首" className="text-white/70 transition hover:text-white" onClick={() => selectByOffset(-1)} type="button">
+            <button aria-label="上一首" className="text-white/70 transition hover:text-white" onClick={() => handleSelectByOffset(-1)} type="button">
               <SkipBack fill="currentColor" size={24} />
             </button>
             <button
               aria-label={isPlaying ? '暂停' : '播放'}
               className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500 text-white shadow-[0_0_34px_rgba(99,102,241,0.58)] transition hover:scale-105"
+              disabled={!isPlayerReady}
               onClick={togglePlayback}
               type="button"
             >
               {isPlaying ? <Pause fill="currentColor" size={28} /> : <Play className="ml-0.5" fill="currentColor" size={28} />}
             </button>
-            <button aria-label="下一首" className="text-white/70 transition hover:text-white" onClick={() => selectByOffset(1)} type="button">
+            <button aria-label="下一首" className="text-white/70 transition hover:text-white" onClick={() => handleSelectByOffset(1)} type="button">
               <SkipForward fill="currentColor" size={24} />
             </button>
             <Volume2 className="text-white/35" size={22} />
           </div>
 
           {coverPanel}
-          {playerEngine}
 
           <div className="mt-5 flex flex-wrap items-center gap-3 text-xs font-semibold text-white/44">
             <span>{playerMessage}</span>
@@ -601,7 +268,7 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
                       track.id === activeTrack.id ? 'border-indigo-300/60 bg-indigo-400/18' : 'border-white/10 bg-white/6 hover:bg-white/10'
                     }`}
                     key={track.id}
-                    onClick={() => selectTrack(track, true)}
+                    onClick={() => handleSelectTrack(track, true)}
                     type="button"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}

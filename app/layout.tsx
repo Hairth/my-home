@@ -5,6 +5,7 @@ import { AmbientBackground } from '@/components/AmbientBackground';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { WelcomeSplash } from '@/components/WelcomeSplash';
+import { PersistentYoutubeMusicProvider } from '@/components/music/YoutubeMusicProvider';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
@@ -32,11 +33,13 @@ export default function RootLayout({
     <html lang="zh-CN" className="h-full antialiased" suppressHydrationWarning>
       <body className="min-h-full flex flex-col bg-[#101322] text-zinc-100">
         <SettingsProvider>
-          <AmbientBackground />
-          <WelcomeSplash />
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
+          <PersistentYoutubeMusicProvider>
+            <AmbientBackground />
+            <WelcomeSplash />
+            <SiteHeader />
+            <main className="flex-1">{children}</main>
+            <SiteFooter />
+          </PersistentYoutubeMusicProvider>
         </SettingsProvider>
       </body>
     </html>
