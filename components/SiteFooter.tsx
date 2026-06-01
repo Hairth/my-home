@@ -7,7 +7,7 @@ export function SiteFooter() {
   const { settings } = useSiteSettings();
 
   return (
-    <footer className="border-t border-zinc-200 bg-white dark:border-white/10 dark:bg-zinc-950">
+    <footer className="border-t border-white/10 bg-[#15182a]/70 text-white backdrop-blur-2xl">
       <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-10 text-sm text-zinc-500 dark:text-zinc-400 md:flex-row md:items-center md:justify-between md:px-6">
         <div>
           © {new Date().getFullYear()} {settings.profile.authorName} · 星火. 保留所有权利。

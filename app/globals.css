@@ -9,7 +9,8 @@
 
 body {
   font-family: var(--font-sans);
-  background: var(--page-bg);
+  background: #101322;
+  color: #f8fafc;
 }
 
 /* Beautiful Chinese typography support */
@@ -172,4 +173,122 @@ input:focus, textarea:focus, button:focus-visible, a:focus-visible {
   margin: 1rem 0;
   max-width: 100%;
   border-radius: 0.6rem;
+}
+
+.glass-panel {
+  position: relative;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.18), rgb(30 41 59 / 0.28));
+  box-shadow: 0 24px 80px rgb(2 6 23 / 0.24);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.18), transparent 38%, rgb(99 102 241 / 0.08));
+}
+
+.glass-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.icon-tile {
+  display: inline-flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.8rem;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background: rgb(255 255 255 / 0.1);
+  color: rgb(255 255 255 / 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.icon-tile:hover {
+  transform: translateY(-2px);
+  border-color: rgb(165 180 252 / 0.6);
+  background: rgb(255 255 255 / 0.16);
+  color: white;
+}
+
+@keyframes danmaku-drift {
+  from {
+    right: -40%;
+    transform: translateX(0);
+  }
+  to {
+    right: 120%;
+    transform: translateX(-20%);
+  }
+}
+
+@keyframes firefly-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  33% {
+    transform: translate3d(8vw, -10vh, 0);
+  }
+  66% {
+    transform: translate3d(-6vw, 8vh, 0);
+  }
+}
+
+@keyframes firefly-pulse {
+  0%,
+  100% {
+    opacity: 0.16;
+    transform: scale(0.55);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.25);
+  }
+}
+
+@keyframes progress-loop {
+  0% {
+    width: 8%;
+  }
+  55% {
+    width: 72%;
+  }
+  100% {
+    width: 96%;
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-progress-loop {
+  animation: progress-loop 16s linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 18s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
 }

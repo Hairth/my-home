@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from 'next';
 import './globals.css';
 import { SettingsProvider } from '@/components/settings/SettingsProvider';
+import { AmbientBackground } from '@/components/AmbientBackground';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { WelcomeSplash } from '@/components/WelcomeSplash';
@@ -29,8 +30,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" className="h-full antialiased" suppressHydrationWarning>
-      <body className="min-h-full flex flex-col bg-[#f6f8fb] text-zinc-900 dark:bg-[#09090b] dark:text-zinc-100">
+      <body className="min-h-full flex flex-col bg-[#101322] text-zinc-100">
         <SettingsProvider>
+          <AmbientBackground />
           <WelcomeSplash />
           <SiteHeader />
           <main className="flex-1">{children}</main>

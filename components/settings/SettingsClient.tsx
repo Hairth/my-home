@@ -263,6 +263,24 @@ export function SettingsClient() {
                 数值越低，欢迎页和主页背景图越清晰；数值越高，文字对比越强。
               </span>
             </label>
+            <label className="block rounded-lg border border-zinc-200 p-4 dark:border-white/10">
+              <span className="mb-3 flex items-center justify-between gap-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+                <span>背景模糊度</span>
+                <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">{settings.background.blurStrength}px</span>
+              </span>
+              <input
+                className="w-full accent-indigo-600"
+                max={60}
+                min={0}
+                onChange={(event) => updateBackground('blurStrength', Number(event.target.value))}
+                step={2}
+                type="range"
+                value={settings.background.blurStrength}
+              />
+              <span className="mt-2 block text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+                控制主页、欢迎页和子页面背景图的虚化强度，越高越接近参考站的梦幻玻璃效果。
+              </span>
+            </label>
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-200">预设图片 URL</span>
               <textarea

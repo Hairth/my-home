@@ -2,82 +2,61 @@
 
 import Link from 'next/link';
 import {
-  ArrowRight,
   BookOpen,
-  Calendar,
+  Camera,
+  Clock3,
+  Code2,
+  FileText,
   FolderKanban,
-  MessageSquarePlus,
-  Music2,
+  Mail,
+  Moon,
+  Search,
   Settings2,
   Sparkles,
   Users,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { RotatingHeroBackground } from '@/components/RotatingHeroBackground';
+import { YoutubeMusicPlayer } from '@/components/music/YoutubeMusicPlayer';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
-import { friends, initialMoments, projects, tracks, writings, type Moment, type Writing } from '@/data/site-data';
+import { initialMoments, projects, writings } from '@/data/site-data';
 
-const MOMENTS_STORAGE_KEY = 'my-home:moments:v1';
-
-function WritingCard({ writing }: { writing: Writing }) {
-  return (
-    <Link
-      className="group block rounded-lg border border-zinc-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-cyan-400 hover:shadow-xl hover:shadow-cyan-950/5 dark:border-white/10 dark:bg-zinc-900/72 dark:hover:border-cyan-300/70"
-      href={`/documents?doc=${encodeURIComponent(writing.slug)}`}
-    >
-      <div className="mb-4 flex items-center justify-between gap-4 font-mono text-xs text-zinc-500 dark:text-zinc-400">
-        <span>{writing.date}</span>
-        <span>{writing.readingTime}</span>
-      </div>
-      <h3 className="mb-3 text-2xl font-semibold leading-tight tracking-normal underline-offset-4 group-hover:underline">
-        {writing.title}
-      </h3>
-      <p className="mb-5 line-clamp-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">{writing.excerpt}</p>
-      <div className="flex flex-wrap gap-2">
-        {writing.tags.map((tag) => (
-          <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs text-cyan-700 dark:bg-cyan-300/10 dark:text-cyan-200" key={tag}>
-            {tag}
-          </span>
-        ))}
-      </div>
-    </Link>
-  );
+function GlassCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return <section className={`glass-panel ${className}`}>{children}</section>;
 }
 
-function SectionHeading({ eyebrow, title, summary }: { eyebrow: string; title: string; summary: string }) {
+function Stat({ label, value, tone }: { label: string; tone: string; value: number }) {
   return (
-    <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-      <div>
-        <div className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-300">{eyebrow}</div>
-        <h2 className="text-4xl font-semibold tracking-normal md:text-5xl">{title}</h2>
-      </div>
-      <p className="max-w-md text-sm leading-7 text-zinc-600 dark:text-zinc-300 md:text-base">{summary}</p>
+    <div className="min-w-16 text-center">
+      <div className={`text-2xl font-black ${tone}`}>{value}</div>
+      <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">{label}</div>
     </div>
   );
 }
 
-function ModuleLink({
+function FeaturePoster({
   href,
+  image,
+  label,
   title,
   summary,
-  icon,
+  className = '',
 }: {
+  className?: string;
   href: string;
-  title: string;
+  image: string;
+  label: string;
   summary: string;
-  icon: React.ReactNode;
+  title: string;
 }) {
   return (
-    <Link
-      className="group flex min-h-40 flex-col justify-between rounded-lg border border-zinc-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-rose-400 hover:shadow-xl hover:shadow-rose-950/5 dark:border-white/10 dark:bg-zinc-900 dark:hover:border-rose-300/70"
-      href={href}
-    >
-      <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
-        {icon}
-      </div>
-      <div>
-        <h3 className="text-xl font-semibold">{title}</h3>
-        <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{summary}</p>
+    <Link className={`group relative overflow-hidden rounded-[24px] border border-white/16 bg-white/10 shadow-2xl shadow-slate-950/20 ${className}`} href={href}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="" className="absolute inset-0 h-full w-full object-cover opacity-88 transition duration-700 group-hover:scale-105" src={image} />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.06),rgba(15,23,42,0.78))]" />
+      <div className="absolute bottom-0 left-0 right-0 p-6">
+        <div className="mb-3 inline-flex rounded-full bg-indigo-500 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">{label}</div>
+        <h3 className="text-2xl font-black text-white drop-shadow">{title}</h3>
+        <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-white/78">{summary}</p>
       </div>
     </Link>
   );
@@ -85,268 +64,173 @@ function ModuleLink({
 
 export default function Home() {
   const { settings } = useSiteSettings();
-  const [moments, setMoments] = useState<Moment[]>(initialMoments);
-  const [newMoment, setNewMoment] = useState('');
-  const [filterTag, setFilterTag] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [query, setQuery] = useState('');
+  const [now, setNow] = useState('');
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      const raw = window.localStorage.getItem(MOMENTS_STORAGE_KEY);
-      if (!raw) return;
+    function updateClock() {
+      setNow(new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date()));
+    }
 
-      try {
-        const parsed = JSON.parse(raw) as Moment[];
-        if (Array.isArray(parsed)) {
-          setMoments(parsed);
-        }
-      } catch {
-        setMoments(initialMoments);
-      }
-    });
-
-    return () => window.cancelAnimationFrame(frame);
+    updateClock();
+    const timer = window.setInterval(updateClock, 1000);
+    return () => window.clearInterval(timer);
   }, []);
 
-  const tags = useMemo(() => Array.from(new Set(writings.flatMap((writing) => writing.tags))), []);
+  const searchResults = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return [];
 
-  const visibleWritings = useMemo(() => {
     return writings
-      .filter((writing) => !filterTag || writing.tags.includes(filterTag))
-      .filter((writing) => {
-        const query = searchQuery.trim().toLowerCase();
-        if (!query) return true;
-        return `${writing.title} ${writing.excerpt} ${writing.tags.join(' ')}`.toLowerCase().includes(query);
-      });
-  }, [filterTag, searchQuery]);
+      .filter((document) => `${document.title} ${document.excerpt} ${document.tags.join(' ')}`.toLowerCase().includes(normalizedQuery))
+      .slice(0, 4);
+  }, [query]);
 
-  function addMoment() {
-    const content = newMoment.trim();
-    if (!content) return;
-
-    const nextMoment: Moment = {
-      id: Date.now(),
-      date: new Date().toISOString().slice(0, 10),
-      content,
-      mood: '✦',
-    };
-
-    const nextMoments = [nextMoment, ...moments];
-    setMoments(nextMoments);
-    setNewMoment('');
-    window.localStorage.setItem(MOMENTS_STORAGE_KEY, JSON.stringify(nextMoments));
-  }
+  const coverImages = settings.background.images.length > 0 ? settings.background.images : ['https://bu.dusays.com/2026/03/24/69c1e38b4c370.jpg'];
 
   return (
-    <>
-      <section className="relative isolate flex min-h-[calc(100vh-4rem)] items-center overflow-hidden bg-zinc-950 text-white">
-        <RotatingHeroBackground />
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-10 px-5 py-20 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
-          <div className="max-w-3xl">
-            <div className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-cyan-100">
-              <Sparkles aria-hidden="true" size={18} />
-              DIGITAL GARDEN
+    <div className="relative min-h-screen px-4 pb-12 pt-24 text-white sm:px-6 lg:px-10">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
+        <div className="relative mx-auto w-full max-w-2xl">
+          <Search className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-white/42" size={21} />
+          <input
+            className="h-16 w-full rounded-[22px] border border-white/12 bg-[#25243a]/78 pl-14 pr-5 text-sm font-semibold text-white shadow-2xl shadow-slate-950/20 outline-none backdrop-blur-2xl placeholder:text-white/38 focus:border-indigo-300/60"
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="搜文档、项目或标签..."
+            value={query}
+          />
+          {searchResults.length > 0 && (
+            <div className="absolute left-0 right-0 top-[72px] z-20 overflow-hidden rounded-2xl border border-white/12 bg-[#1d2032]/92 p-2 shadow-2xl backdrop-blur-2xl">
+              {searchResults.map((document) => (
+                <Link
+                  className="block rounded-xl px-4 py-3 text-sm font-semibold text-white/82 transition hover:bg-white/10"
+                  href={`/documents?doc=${encodeURIComponent(document.slug)}`}
+                  key={document.id}
+                >
+                  {document.title}
+                  <span className="ml-3 text-xs text-white/42">{document.readingTime}</span>
+                </Link>
+              ))}
             </div>
-            <h1 className="text-5xl font-semibold leading-none tracking-normal md:text-7xl lg:text-8xl">
-              {settings.profile.siteTitle}
-            </h1>
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-white/78 md:text-xl">{settings.profile.tagline}</p>
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link
-                className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-white px-6 text-sm font-semibold text-zinc-950 transition hover:-translate-y-0.5 hover:bg-cyan-50"
-                href="/documents"
-              >
-                打开文档
-                <ArrowRight aria-hidden="true" size={18} />
+          )}
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-12">
+          <GlassCard className="lg:col-span-7">
+            <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-start sm:justify-between md:p-8">
+              <div className="flex min-w-0 gap-5">
+                <div className="h-24 w-24 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-400 to-fuchsia-500 p-1 shadow-xl shadow-indigo-950/35">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img alt={settings.profile.authorName} className="h-full w-full rounded-[14px] object-cover" src={settings.profile.avatarUrl} />
+                </div>
+                <div className="min-w-0">
+                  <h1 className="truncate text-4xl font-black tracking-normal">{settings.profile.authorName}</h1>
+                  <p className="mt-3 max-w-lg text-sm font-semibold leading-7 text-white/68">{settings.profile.bio}</p>
+                </div>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <a className="icon-tile" href={settings.profile.githubUrl} rel="noopener noreferrer" target="_blank" title="GitHub">
+                  <Code2 size={18} />
+                </a>
+                <a className="icon-tile" href={`mailto:${settings.profile.email}`} title="Email">
+                  <Mail size={18} />
+                </a>
+                <Link className="icon-tile" href="/settings" title="设置">
+                  <Settings2 size={18} />
+                </Link>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-5 border-t border-white/10 px-6 py-5 md:px-8">
+              <Stat label="文档" tone="text-indigo-300" value={writings.length} />
+              <div className="h-10 w-px bg-white/10" />
+              <Stat label="瞬间" tone="text-fuchsia-300" value={initialMoments.length} />
+              <div className="h-10 w-px bg-white/10" />
+              <Stat label="项目" tone="text-rose-300" value={projects.length} />
+              <div className="ml-auto hidden text-xs font-semibold leading-6 text-white/45 md:block">{settings.profile.tagline}</div>
+            </div>
+          </GlassCard>
+
+          <div className="lg:col-span-5">
+            <YoutubeMusicPlayer compact />
+          </div>
+        </div>
+
+        <GlassCard className="flex min-h-16 items-center justify-center px-6 py-4">
+          <div className="text-center text-lg font-black tracking-wide text-white">作词：愿每一次记录都能照亮下一段路</div>
+          <Sparkles className="absolute right-7 text-indigo-300/40" size={22} />
+        </GlassCard>
+
+        <div className="grid gap-5 lg:grid-cols-12">
+          <FeaturePoster
+            className="min-h-[370px] lg:col-span-4"
+            href={`/documents?doc=${encodeURIComponent(writings[0].slug)}`}
+            image={coverImages[0]}
+            label="Latest Insight"
+            summary={writings[0].excerpt}
+            title={writings[0].title}
+          />
+
+          <div className="grid gap-5 lg:col-span-8">
+            <FeaturePoster
+              className="min-h-[220px]"
+              href="/projects"
+              image={coverImages[1] ?? coverImages[0]}
+              label="Projects"
+              summary={projects[0].description}
+              title="正在构建的工具"
+            />
+
+            <div className="grid gap-5 sm:grid-cols-[1.7fr_0.9fr]">
+              <Link className="glass-panel min-h-44 p-7 transition hover:-translate-y-1 hover:border-indigo-300/35" href="/moments">
+                <div className="mb-3 flex items-center gap-3 text-xs font-black uppercase tracking-[0.18em] text-indigo-200">
+                  <FileText size={17} />
+                  Records
+                </div>
+                <h3 className="text-2xl font-black">瞬间同步完成</h3>
+                <p className="mt-3 line-clamp-2 text-sm font-semibold leading-6 text-white/62">{initialMoments[0].content}</p>
+              </Link>
+
+              <Link className="glass-panel flex min-h-44 flex-col items-center justify-center p-7 text-center transition hover:-translate-y-1 hover:border-indigo-300/35" href="/settings">
+                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500/30 text-indigo-100 shadow-[0_0_28px_rgba(99,102,241,0.32)]">
+                  <Moon size={28} />
+                </div>
+                <h3 className="text-xl font-black">夜间模式</h3>
+                <p className="mt-2 text-xs font-semibold text-white/48">背景模糊与遮罩可调</p>
               </Link>
             </div>
           </div>
-
-          <div className="rounded-lg border border-white/18 bg-white/12 p-6 backdrop-blur-xl">
-            <div className="flex items-center gap-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt={settings.profile.authorName}
-                className="h-16 w-16 rounded-lg object-cover ring-1 ring-white/25"
-                src={settings.profile.avatarUrl}
-              />
-              <div>
-                <div className="text-2xl font-semibold">{settings.profile.authorName}</div>
-                <div className="mt-1 text-sm text-white/65">{settings.profile.location}</div>
-              </div>
-            </div>
-            <p className="mt-6 text-sm leading-7 text-white/75">{settings.profile.bio}</p>
-            <div className="mt-7 grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-lg bg-white/12 px-3 py-4">
-                <div className="text-2xl font-semibold">{writings.length}</div>
-                <div className="mt-1 text-xs text-white/60">文档</div>
-              </div>
-              <div className="rounded-lg bg-white/12 px-3 py-4">
-                <div className="text-2xl font-semibold">{moments.length}</div>
-                <div className="mt-1 text-xs text-white/60">瞬间</div>
-              </div>
-              <div className="rounded-lg bg-white/12 px-3 py-4">
-                <div className="text-2xl font-semibold">{projects.length}</div>
-                <div className="mt-1 text-xs text-white/60">项目</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {settings.modules.dashboard && (
-        <section className="border-b border-zinc-200 bg-white py-12 dark:border-white/10 dark:bg-zinc-950">
-          <div className="mx-auto grid max-w-7xl gap-4 px-5 sm:px-6 md:grid-cols-4">
-            <ModuleLink href="/documents" icon={<BookOpen size={21} />} summary="创建、上传、编辑和浏览本地文档。" title="文档库" />
-            {settings.modules.moments && (
-              <ModuleLink href="/moments" icon={<MessageSquarePlus size={21} />} summary="保存短句、状态和当天的小发现。" title="瞬间" />
-            )}
-            {settings.modules.projects && (
-              <ModuleLink href="/projects" icon={<FolderKanban size={21} />} summary="整理正在构建的工具与实验。" title="项目" />
-            )}
-            {settings.modules.friends && (
-              <ModuleLink href="/friends" icon={<Users size={21} />} summary="收纳参考项目与朋友链接。" title="友链" />
-            )}
-          </div>
-        </section>
-      )}
-
-      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-6">
-        <SectionHeading eyebrow="DOCUMENTS" summary="Markdown 文档、技术实践、生活随笔和长期思考都会沉到这里。" title="文档与笔记" />
-
-        <div className="mb-8 flex flex-col gap-4 lg:flex-row">
-          <input
-            className="min-h-12 flex-1 rounded-lg border border-zinc-200 bg-white px-5 text-sm placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-900"
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="搜索文档标题、摘要或标签"
-            type="text"
-            value={searchQuery}
-          />
-          <div className="flex flex-wrap gap-2">
-            <button
-              className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
-                !filterTag
-                  ? 'border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950'
-                  : 'border-zinc-200 hover:border-cyan-400 dark:border-white/10 dark:hover:border-cyan-300'
-              }`}
-              onClick={() => setFilterTag(null)}
-              type="button"
-            >
-              全部
-            </button>
-            {tags.map((tag) => (
-              <button
-                className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
-                  filterTag === tag
-                    ? 'border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950'
-                    : 'border-zinc-200 hover:border-cyan-400 dark:border-white/10 dark:hover:border-cyan-300'
-                }`}
-                key={tag}
-                onClick={() => setFilterTag(tag === filterTag ? null : tag)}
-                type="button"
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {visibleWritings.map((writing) => (
-            <WritingCard key={writing.slug} writing={writing} />
-          ))}
-        </div>
-      </section>
-
-      {settings.modules.moments && (
-        <section className="border-y border-zinc-200 bg-zinc-50 py-20 dark:border-white/10 dark:bg-zinc-900/44">
-          <div className="mx-auto max-w-7xl px-5 sm:px-6">
-            <SectionHeading eyebrow="MOMENTS" summary="像 XinghuisamaBlogs 的动态页一样，把短想法留在本地，刷新后仍然保留。" title="瞬间记录" />
-
-            <div className="mb-10 rounded-lg border border-zinc-200 bg-white p-5 dark:border-white/10 dark:bg-zinc-950 md:p-6">
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <input
-                  className="min-h-12 flex-1 rounded-lg border border-zinc-200 bg-white px-5 text-sm placeholder:text-zinc-400 focus:border-rose-500 dark:border-white/10 dark:bg-zinc-900"
-                  onChange={(event) => setNewMoment(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') addMoment();
-                  }}
-                  placeholder="今天有什么想说的"
-                  value={newMoment}
-                />
-                <button
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-rose-600 px-6 text-sm font-semibold text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-45"
-                  disabled={!newMoment.trim()}
-                  onClick={addMoment}
-                  type="button"
-                >
-                  <MessageSquarePlus aria-hidden="true" size={18} />
-                  记录
-                </button>
-              </div>
-            </div>
-
-            <div className="grid gap-4 lg:grid-cols-3">
-              {moments.slice(0, 6).map((moment) => (
-                <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-white/10 dark:bg-zinc-950" key={moment.id}>
-                  <div className="mb-4 flex items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
-                    <span className="text-xl">{moment.mood}</span>
-                    <Calendar aria-hidden="true" size={16} />
-                    <span>{moment.date}</span>
-                  </div>
-                  <p className="text-sm leading-7 text-zinc-700 dark:text-zinc-200">{moment.content}</p>
-                </div>
-              ))}
-            </div>
+        <GlassCard className="grid items-center gap-5 px-6 py-5 md:grid-cols-[160px_1fr_auto]">
+          <div className="font-mono text-3xl font-black tracking-widest">{now}</div>
+          <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-white/58">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.75)]" />
+            系统已稳定运行
+            <span className="rounded-lg border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-sky-200">Next.js 16</span>
+            <span className="rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-cyan-200">React 19</span>
+            <span className="rounded-lg border border-teal-400/30 bg-teal-400/10 px-3 py-1 text-teal-200">Tailwind 4</span>
           </div>
-        </section>
-      )}
-
-      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-6">
-        <SectionHeading eyebrow="BOARD" summary="主页保留常用入口，独立子页面负责更完整的筛选、查看和管理体验。" title="功能面板" />
-
-        <div className="grid gap-5 lg:grid-cols-3">
-          {settings.modules.projects && (
-            <Link className="rounded-lg border border-zinc-200 bg-white p-6 transition hover:border-violet-400 dark:border-white/10 dark:bg-zinc-900" href="/projects">
-              <FolderKanban aria-hidden="true" className="mb-5 text-violet-600 dark:text-violet-300" size={28} />
-              <h3 className="text-2xl font-semibold">项目</h3>
-              <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">{projects[0].description}</p>
+          <div className="flex gap-2">
+            <Link className="icon-tile" href="/documents" title="文档">
+              <BookOpen size={17} />
             </Link>
-          )}
-          {settings.modules.friends && (
-            <Link className="rounded-lg border border-zinc-200 bg-white p-6 transition hover:border-emerald-400 dark:border-white/10 dark:bg-zinc-900" href="/friends">
-              <Users aria-hidden="true" className="mb-5 text-emerald-600 dark:text-emerald-300" size={28} />
-              <h3 className="text-2xl font-semibold">友链</h3>
-              <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">已收录 {friends.length} 个参考与同步位置。</p>
+            <Link className="icon-tile" href="/projects" title="项目">
+              <FolderKanban size={17} />
             </Link>
-          )}
-          {settings.modules.music && (
-            <Link className="rounded-lg border border-zinc-200 bg-white p-6 transition hover:border-amber-400 dark:border-white/10 dark:bg-zinc-900" href="/music">
-              <Music2 aria-hidden="true" className="mb-5 text-amber-600 dark:text-amber-300" size={28} />
-              <h3 className="text-2xl font-semibold">音乐</h3>
-              <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">准备了 {tracks.length} 个歌单入口，写作时可以快速切换氛围。</p>
+            <Link className="icon-tile" href="/friends" title="友链">
+              <Users size={17} />
             </Link>
-          )}
-        </div>
-      </section>
-
-      <section className="border-t border-zinc-200 bg-white py-16 dark:border-white/10 dark:bg-zinc-950">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 sm:px-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-3xl font-semibold tracking-normal">欢迎词和图源已经接入设置</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-600 dark:text-zinc-300">
-              修改欢迎标题、图片 API、轮换间隔或模块开关后，主页和欢迎页会立即使用新的配置。
-            </p>
+            <Link className="icon-tile" href="/music" title="音乐">
+              <Camera size={17} />
+            </Link>
           </div>
-          <Link
-            className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-zinc-950 px-6 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-cyan-700 dark:bg-white dark:text-zinc-950 dark:hover:bg-cyan-100"
-            href="/settings"
-          >
-            <Settings2 aria-hidden="true" size={18} />
-            管理设置
-          </Link>
+        </GlassCard>
+
+        <div className="flex justify-center text-xs font-semibold text-white/38">
+          <Clock3 className="mr-2" size={15} />
+          工作进度同步到 Hairth/my-home
         </div>
-      </section>
-    </>
+      </div>
+    </div>
   );
 }

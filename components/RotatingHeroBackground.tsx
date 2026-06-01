@@ -15,6 +15,7 @@ export function RotatingHeroBackground({ className = '', intensity = 'strong' }:
   const [apiSeed, setApiSeed] = useState(1);
 
   const intervalMs = Math.max(3, settings.background.intervalSeconds || 10) * 1000;
+  const blurStrength = Math.min(60, Math.max(0, settings.background.blurStrength ?? 18));
   const overlayOpacity = Math.min(100, Math.max(0, settings.background.overlayOpacity ?? 100)) / 100;
 
   const images = useMemo(() => {
@@ -47,7 +48,12 @@ export function RotatingHeroBackground({ className = '', intensity = 'strong' }:
         <div
           className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
           key={`${image}-${itemIndex}`}
-          style={{ backgroundImage: `url("${image}")`, opacity: itemIndex === visibleIndex ? 1 : 0 }}
+          style={{
+            backgroundImage: `url("${image}")`,
+            filter: `blur(${blurStrength}px) saturate(1.12)`,
+            opacity: itemIndex === visibleIndex ? 1 : 0,
+            transform: `scale(${1 + blurStrength / 180})`,
+          }}
         />
       ))}
       <div

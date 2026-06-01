@@ -1,68 +1,64 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Music2, Play } from 'lucide-react';
-import { useState } from 'react';
-import { tracks } from '@/data/site-data';
+import { ArrowLeft, Disc3, Music2, Radio } from 'lucide-react';
+import { YoutubeMusicPlayer } from '@/components/music/YoutubeMusicPlayer';
 
 export default function MusicPage() {
-  const [activeId, setActiveId] = useState(tracks[0]?.id ?? '');
-  const activeTrack = tracks.find((track) => track.id === activeId) ?? tracks[0];
-
   return (
-    <div className="mx-auto max-w-6xl px-5 py-16 sm:px-6">
-      <Link className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-cyan-700 dark:hover:text-cyan-200" href="/">
-        <ArrowLeft aria-hidden="true" size={16} />
-        返回首页
-      </Link>
+    <div className="min-h-screen px-4 pb-16 pt-28 text-white sm:px-6 lg:px-10">
+      <div className="mx-auto w-full max-w-6xl">
+        <Link className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-white/58 transition hover:text-white" href="/">
+          <ArrowLeft aria-hidden="true" size={16} />
+          返回首页
+        </Link>
 
-      <div className="mt-8 flex flex-col gap-6 border-b border-zinc-200 pb-10 dark:border-white/10 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-5xl font-semibold tracking-normal md:text-6xl">音乐</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">保留 XinghuisamaBlogs 的歌单式入口，适合写作和调试时切换氛围。</p>
+        <div className="mb-8">
+          <h1 className="text-5xl font-black tracking-normal md:text-6xl">云端乐律</h1>
+          <p className="mt-3 max-w-2xl text-base font-semibold leading-8 text-white/58">在代码的缝隙中寻找灵魂的共鸣，推荐合集来自站内 YouTube Music API。</p>
         </div>
-        <Music2 aria-hidden="true" className="text-amber-600 dark:text-amber-300" size={42} />
+
+        <div className="grid gap-7 lg:grid-cols-[0.88fr_1.12fr]">
+          <YoutubeMusicPlayer />
+
+          <section className="glass-panel overflow-hidden p-0">
+            <div className="flex justify-center border-b border-white/10 bg-white/6 p-5">
+              <div className="inline-flex rounded-full border border-white/16 bg-slate-950/28 p-1">
+                <button className="rounded-full bg-indigo-500 px-10 py-2 text-xs font-black text-white shadow-lg" type="button">
+                  歌词
+                </button>
+                <button className="rounded-full px-10 py-2 text-xs font-black text-white/38" type="button">
+                  歌单
+                </button>
+              </div>
+            </div>
+            <div className="relative min-h-[560px] overflow-hidden p-8">
+              <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-slate-900/38 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-slate-900/48 to-transparent" />
+              <div className="flex min-h-[500px] flex-col items-center justify-center gap-8 text-center">
+                <Disc3 className="animate-spin-slow text-indigo-300/35" size={52} />
+                <div className="rounded-2xl bg-white/10 px-14 py-5 text-2xl font-black text-indigo-200 shadow-inner">作词：愿每个夜晚都有回声</div>
+                <p className="text-lg font-bold text-white/26">作曲：YouTube Music 推荐合集</p>
+                <p className="text-lg font-bold text-white/18">编曲：此刻的背景图与光点</p>
+                <p className="text-lg font-bold text-white/12">制作人：Hairth 的数字花园</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section className="glass-panel mt-7 p-7">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/24 text-indigo-100">
+              <Radio size={23} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black">音乐模块已放到主页</h2>
+              <p className="mt-1 text-sm font-semibold text-white/52">这里保留完整播放页效果，主页也会同步显示音乐模块。</p>
+            </div>
+            <Music2 className="ml-auto hidden text-white/16 md:block" size={42} />
+          </div>
+        </section>
       </div>
-
-      <section className="mt-10 grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
-        <div className="space-y-3">
-          {tracks.map((track) => (
-            <button
-              className={`flex w-full items-center gap-4 rounded-lg border p-5 text-left transition ${
-                activeId === track.id
-                  ? 'border-amber-400 bg-amber-50 dark:border-amber-300/70 dark:bg-amber-300/10'
-                  : 'border-zinc-200 bg-white hover:border-amber-400 dark:border-white/10 dark:bg-zinc-900 dark:hover:border-amber-300/70'
-              }`}
-              key={track.id}
-              onClick={() => setActiveId(track.id)}
-              type="button"
-            >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white">
-                <Play aria-hidden="true" size={18} />
-              </div>
-              <div className="min-w-0">
-                <div className="truncate text-lg font-semibold">{track.title}</div>
-                <div className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{track.artist}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        <div className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-white/10 dark:bg-zinc-900">
-          <div className="mb-5">
-            <div className="text-sm font-semibold text-amber-700 dark:text-amber-200">当前歌单</div>
-            <h2 className="mt-2 text-3xl font-semibold">{activeTrack.title}</h2>
-            <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">{activeTrack.note}</p>
-          </div>
-          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 dark:border-white/10 dark:bg-zinc-950">
-            <iframe
-              className="h-[86px] w-full"
-              src={`https://music.163.com/outchain/player?type=2&id=${activeTrack.id}&auto=0&height=66`}
-              title={activeTrack.title}
-            />
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
