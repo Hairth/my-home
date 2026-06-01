@@ -12,6 +12,7 @@ import {
   Save,
   Search,
   Trash2,
+  Wand2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
@@ -46,6 +47,12 @@ function getHostLabel(value: string) {
   } catch {
     return value;
   }
+}
+
+function getFaviconUrl(value: string) {
+  const href = normalizeUrl(value);
+  if (!href) return '';
+  return `https://www.google.com/s2/favicons?sz=128&domain_url=${encodeURIComponent(href)}`;
 }
 
 function swapItems(items: NavigationBookmark[], id: string, direction: -1 | 1) {
@@ -110,7 +117,7 @@ export function WebsiteNavigationManager() {
     if (!name || !href) return;
 
     const nextBookmark: NavigationBookmark = {
-      avatar: form.avatar.trim() || `https://www.google.com/s2/favicons?sz=128&domain_url=${encodeURIComponent(href)}`,
+      avatar: form.avatar.trim() || getFaviconUrl(href),
       color: form.color || '#10b981',
       description: form.description.trim() || getHostLabel(href),
       href,
@@ -157,8 +164,14 @@ export function WebsiteNavigationManager() {
     resetForm();
   }
 
+  function fetchIconFromLink() {
+    const nextAvatar = getFaviconUrl(form.href);
+    if (!nextAvatar) return;
+    updateForm('avatar', nextAvatar);
+  }
+
   return (
-    <div className="mx-auto max-w-6xl px-5 py-16 sm:px-6">
+    <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6">
       <Link className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-cyan-700 dark:hover:text-cyan-200" href="/">
         <ArrowLeft aria-hidden="true" size={16} />
         返回首页
@@ -174,7 +187,7 @@ export function WebsiteNavigationManager() {
         <Compass aria-hidden="true" className="text-emerald-600 dark:text-emerald-300" size={42} />
       </div>
 
-      <div className="mt-8 grid gap-5 lg:grid-cols-[360px_1fr]">
+      <div className="mt-8 grid gap-5 lg:grid-cols-[320px_1fr]">
         <section className="rounded-lg border border-zinc-200 bg-white p-5 text-zinc-950 shadow-xl shadow-slate-950/5 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100">
           <div className="mb-5 flex items-center justify-between gap-3">
             <h2 className="text-xl font-semibold">{editingId ? '编辑导航' : '新增导航'}</h2>
@@ -215,12 +228,23 @@ export function WebsiteNavigationManager() {
             </label>
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-200">图标 URL</span>
-              <input
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 outline-none focus:border-emerald-500 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100"
-                onChange={(event) => updateForm('avatar', event.target.value)}
-                placeholder="留空会自动使用网站 favicon"
-                value={form.avatar}
-              />
+              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                <input
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 outline-none focus:border-emerald-500 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100"
+                  onChange={(event) => updateForm('avatar', event.target.value)}
+                  placeholder="留空或自动获取 favicon"
+                  value={form.avatar}
+                />
+                <button
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-45 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-white/10"
+                  disabled={!form.href.trim()}
+                  onClick={fetchIconFromLink}
+                  type="button"
+                >
+                  <Wand2 size={15} />
+                  自动获取
+                </button>
+              </div>
             </label>
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-200">强调色</span>
@@ -265,44 +289,44 @@ export function WebsiteNavigationManager() {
             />
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filteredBookmarks.map((bookmark) => (
               <article
-                className="group rounded-lg border border-zinc-200 bg-white p-6 text-zinc-950 transition hover:-translate-y-0.5 hover:border-emerald-400 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100"
+                className="group rounded-lg border border-zinc-200 bg-white p-4 text-zinc-950 transition hover:-translate-y-0.5 hover:border-emerald-400 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100"
                 key={bookmark.id}
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img alt={bookmark.name} className="h-16 w-16 rounded-lg object-cover ring-1 ring-zinc-200 dark:ring-white/10" src={bookmark.avatar} />
+                  <img alt={bookmark.name} className="h-12 w-12 rounded-lg object-cover ring-1 ring-zinc-200 dark:ring-white/10" src={bookmark.avatar} />
                   <div className="min-w-0 flex-1">
-                    <h2 className="truncate text-2xl font-semibold">{bookmark.name}</h2>
-                    <div className="mt-1 h-1.5 w-20 rounded-full" style={{ backgroundColor: bookmark.color }} />
-                    <div className="mt-2 truncate text-xs text-zinc-400">{getHostLabel(bookmark.href)}</div>
+                    <h2 className="truncate text-lg font-semibold">{bookmark.name}</h2>
+                    <div className="mt-1 h-1 w-16 rounded-full" style={{ backgroundColor: bookmark.color }} />
+                    <div className="mt-1 truncate text-xs text-zinc-400">{getHostLabel(bookmark.href)}</div>
                   </div>
                 </div>
-                <p className="mt-6 line-clamp-3 min-h-[5.25rem] text-sm leading-7 text-zinc-600 dark:text-zinc-300">{bookmark.description}</p>
+                <p className="mt-4 line-clamp-2 min-h-12 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{bookmark.description}</p>
 
-                <div className="mt-6 flex flex-wrap items-center gap-2">
+                <div className="mt-4 flex flex-wrap items-center gap-1.5">
                   <a
-                    className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-500"
                     href={bookmark.href}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
                     访问
-                    <ArrowUpRight aria-hidden="true" className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" size={16} />
+                    <ArrowUpRight aria-hidden="true" className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" size={15} />
                   </a>
-                  <button className="rounded-lg border border-zinc-200 p-2 text-zinc-500 transition hover:bg-zinc-100 dark:border-white/10 dark:hover:bg-white/10" onClick={() => editBookmark(bookmark)} title="编辑" type="button">
-                    <Pencil size={16} />
+                  <button className="rounded-lg border border-zinc-200 p-1.5 text-zinc-500 transition hover:bg-zinc-100 dark:border-white/10 dark:hover:bg-white/10" onClick={() => editBookmark(bookmark)} title="编辑" type="button">
+                    <Pencil size={15} />
                   </button>
-                  <button className="rounded-lg border border-zinc-200 p-2 text-zinc-500 transition hover:bg-zinc-100 dark:border-white/10 dark:hover:bg-white/10" onClick={() => moveBookmark(bookmark.id, -1)} title="上移" type="button">
-                    <ArrowUp size={16} />
+                  <button className="rounded-lg border border-zinc-200 p-1.5 text-zinc-500 transition hover:bg-zinc-100 dark:border-white/10 dark:hover:bg-white/10" onClick={() => moveBookmark(bookmark.id, -1)} title="上移" type="button">
+                    <ArrowUp size={15} />
                   </button>
-                  <button className="rounded-lg border border-zinc-200 p-2 text-zinc-500 transition hover:bg-zinc-100 dark:border-white/10 dark:hover:bg-white/10" onClick={() => moveBookmark(bookmark.id, 1)} title="下移" type="button">
-                    <ArrowDown size={16} />
+                  <button className="rounded-lg border border-zinc-200 p-1.5 text-zinc-500 transition hover:bg-zinc-100 dark:border-white/10 dark:hover:bg-white/10" onClick={() => moveBookmark(bookmark.id, 1)} title="下移" type="button">
+                    <ArrowDown size={15} />
                   </button>
-                  <button className="ml-auto rounded-lg border border-rose-200 p-2 text-rose-500 transition hover:bg-rose-50 dark:border-rose-300/20 dark:hover:bg-rose-300/10" onClick={() => deleteBookmark(bookmark.id)} title="删除" type="button">
-                    <Trash2 size={16} />
+                  <button className="ml-auto rounded-lg border border-rose-200 p-1.5 text-rose-500 transition hover:bg-rose-50 dark:border-rose-300/20 dark:hover:bg-rose-300/10" onClick={() => deleteBookmark(bookmark.id)} title="删除" type="button">
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </article>
