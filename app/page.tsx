@@ -5,14 +5,12 @@ import {
   BookOpen,
   Camera,
   Clock3,
-  Code2,
   FileText,
   FolderKanban,
   Mail,
+  Monitor,
   Moon,
   Search,
-  Settings2,
-  Sparkles,
   Users,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -115,8 +113,8 @@ export default function Home() {
           )}
         </div>
 
-        <div className="grid items-start gap-5 lg:grid-cols-12">
-          <GlassCard className="lg:col-span-7">
+        <div className="grid items-stretch gap-5 lg:grid-cols-12">
+          <GlassCard className="h-full lg:col-span-7">
             <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-start sm:justify-between md:p-8">
               <div className="flex min-w-0 gap-5">
                 <div className="h-24 w-24 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-400 to-fuchsia-500 p-1 shadow-xl shadow-indigo-950/35">
@@ -129,15 +127,12 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex shrink-0 gap-2">
-                <a className="icon-tile" href={settings.profile.githubUrl} rel="noopener noreferrer" target="_blank" title="GitHub">
-                  <Code2 size={18} />
+                <a className="icon-tile" href="https://komari.megumii.com/" rel="noopener noreferrer" target="_blank" title="Komari">
+                  <Monitor size={18} />
                 </a>
-                <a className="icon-tile" href={`mailto:${settings.profile.email}`} title="Email">
+                <a className="icon-tile" href="https://mail.google.com/" rel="noopener noreferrer" target="_blank" title="Gmail">
                   <Mail size={18} />
                 </a>
-                <Link className="icon-tile" href="/settings" title="设置">
-                  <Settings2 size={18} />
-                </Link>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-5 border-t border-white/10 px-6 py-5 md:px-8">
@@ -150,15 +145,10 @@ export default function Home() {
             </div>
           </GlassCard>
 
-          <div className="lg:col-span-5">
+          <div className="h-full lg:col-span-5">
             <YoutubeMusicPlayer compact />
           </div>
         </div>
-
-        <GlassCard className="flex min-h-16 items-center justify-center px-6 py-4">
-          <div className="text-center text-lg font-black tracking-wide text-white">作词：愿每一次记录都能照亮下一段路</div>
-          <Sparkles className="absolute right-7 text-indigo-300/40" size={22} />
-        </GlassCard>
 
         <div className="grid gap-5 lg:grid-cols-12">
           <FeaturePoster

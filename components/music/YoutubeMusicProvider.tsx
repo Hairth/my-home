@@ -154,24 +154,6 @@ export function formatTime(seconds: number) {
   return `${String(minutes).padStart(2, '0')}:${String(restSeconds).padStart(2, '0')}`;
 }
 
-export function getDescriptionLines(track: YoutubeMusicTrack) {
-  const description = track.description
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((line) => !/^https?:\/\//i.test(line))
-    .filter((line) => !/^#/.test(line))
-    .slice(0, 18);
-
-  if (description.length > 0) return description;
-
-  return [
-    'YouTube Data API 没有提供歌词字段。',
-    '这里会优先显示视频描述；如果视频描述里有歌词，就会在这里出现。',
-    `当前曲目：${track.title}`,
-  ];
-}
-
 export function PersistentYoutubeMusicProvider({ children }: { children: React.ReactNode }) {
   const { isLoaded, settings } = useSiteSettings();
   const [tracks, setTracks] = useState<YoutubeMusicTrack[]>(fallbackTracks);

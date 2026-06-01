@@ -1,8 +1,7 @@
 'use client';
 
-import { Disc3, ExternalLink, FileText, ListMusic, Pause, Play, SkipBack, SkipForward, Volume2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { formatTime, getDescriptionLines, useYoutubeMusic } from '@/components/music/YoutubeMusicProvider';
+import { Disc3, ExternalLink, ListMusic, Pause, Play, SkipBack, SkipForward, Volume2 } from 'lucide-react';
+import { formatTime, useYoutubeMusic } from '@/components/music/YoutubeMusicProvider';
 import type { YoutubeMusicTrack } from '@/components/music/YoutubeMusicProvider';
 
 export type { YoutubeMusicTrack } from '@/components/music/YoutubeMusicProvider';
@@ -10,8 +9,6 @@ export type { YoutubeMusicTrack } from '@/components/music/YoutubeMusicProvider'
 type YoutubeMusicPlayerProps = {
   compact?: boolean;
 };
-
-type PanelTab = 'lyrics' | 'playlist';
 
 export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps) {
   const {
@@ -28,17 +25,12 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
     togglePlayback,
     tracks,
   } = useYoutubeMusic();
-  const [activeTab, setActiveTab] = useState<PanelTab>('lyrics');
 
-  const descriptionLines = useMemo(() => getDescriptionLines(activeTrack), [activeTrack]);
   const progressMax = duration > 0 ? duration : 100;
   const progressValue = duration > 0 ? Math.min(currentTime, duration) : 0;
 
   function handleSelectTrack(track: YoutubeMusicTrack, shouldPlay = true) {
     selectTrack(track, shouldPlay);
-    if (!compact) {
-      setActiveTab('lyrics');
-    }
   }
 
   function handleSelectByOffset(offset: number) {
@@ -66,7 +58,7 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
 
   if (compact) {
     return (
-      <section className="glass-panel overflow-hidden p-4 md:p-5">
+      <section className="glass-panel h-full overflow-hidden p-4 md:p-5">
         <div className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
             <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border border-white/30 bg-white/15 shadow-[0_0_28px_rgba(99,102,241,0.28)] md:h-16 md:w-16">
@@ -211,80 +203,42 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
         </div>
 
         <aside className="min-w-0">
-          <div className="flex justify-center border-b border-white/10 bg-white/6 p-5">
-            <div className="inline-flex rounded-full border border-white/16 bg-slate-950/28 p-1">
-              <button
-                className={`inline-flex items-center gap-2 rounded-full px-9 py-2 text-xs font-black transition ${activeTab === 'lyrics' ? 'bg-indigo-500 text-white shadow-lg' : 'text-white/45 hover:text-white'}`}
-                onClick={() => setActiveTab('lyrics')}
-                type="button"
-              >
-                <FileText size={15} />
-                歌词
-              </button>
-              <button
-                className={`inline-flex items-center gap-2 rounded-full px-9 py-2 text-xs font-black transition ${activeTab === 'playlist' ? 'bg-indigo-500 text-white shadow-lg' : 'text-white/45 hover:text-white'}`}
-                onClick={() => setActiveTab('playlist')}
-                type="button"
-              >
-                <ListMusic size={15} />
-                歌单
-              </button>
+          <div className="border-b border-white/10 bg-white/6 px-5 py-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/16 bg-indigo-500 px-5 py-2 text-xs font-black text-white shadow-lg">
+              <ListMusic size={15} />
+              歌单
             </div>
           </div>
 
-          {activeTab === 'lyrics' ? (
-            <div className="relative min-h-[620px] overflow-hidden p-6 md:p-8">
-              <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-slate-900/35 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-900/45 to-transparent" />
-              <div className="relative mx-auto flex max-h-[560px] max-w-2xl flex-col gap-4 overflow-auto pr-2 text-center">
-                <div className="mb-4 flex justify-center">
-                  <Disc3 className="animate-spin-slow text-indigo-300/35" size={46} />
-                </div>
-                <h3 className="text-2xl font-black text-indigo-100">{activeTrack.title}</h3>
-                <p className="text-sm font-semibold text-white/48">{activeTrack.artist}</p>
-                <div className="mt-4 space-y-3">
-                  {descriptionLines.map((line, index) => (
-                    <p
-                      className={`rounded-2xl border border-white/8 bg-white/8 px-5 py-3 text-sm font-semibold leading-7 ${index === 0 ? 'text-white' : 'text-white/58'}`}
-                      key={`${line}-${index}`}
-                    >
-                      {line}
-                    </p>
-                  ))}
-                </div>
-              </div>
+          <div className="min-h-[620px] p-5 md:p-6">
+            <div className="mb-4 flex items-center gap-2 text-sm font-bold text-white">
+              <ListMusic size={17} />
+              推荐合集
+              <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/42">{source}</span>
             </div>
-          ) : (
-            <div className="min-h-[620px] p-5 md:p-6">
-              <div className="mb-4 flex items-center gap-2 text-sm font-bold text-white">
-                <ListMusic size={17} />
-                推荐合集
-                <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/42">{source}</span>
-              </div>
-              <div className="max-h-[548px] space-y-3 overflow-auto pr-1">
-                {tracks.map((track, index) => (
-                  <button
-                    className={`grid w-full grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-4 rounded-2xl border p-3 text-left transition ${
-                      track.id === activeTrack.id ? 'border-indigo-300/60 bg-indigo-400/18' : 'border-white/10 bg-white/6 hover:bg-white/10'
-                    }`}
-                    key={track.id}
-                    onClick={() => handleSelectTrack(track, true)}
-                    type="button"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt={track.title} className="h-12 w-12 rounded-xl object-cover" src={track.cover} />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-black text-white">{track.title}</span>
-                      <span className="mt-1 block truncate text-xs font-semibold text-white/50">{track.artist}</span>
-                    </span>
-                    <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] font-black text-white/48">
-                      {track.duration !== '--:--' ? track.duration : String(index + 1).padStart(2, '0')}
-                    </span>
-                  </button>
-                ))}
-              </div>
+            <div className="max-h-[548px] space-y-3 overflow-auto pr-1">
+              {tracks.map((track, index) => (
+                <button
+                  className={`grid w-full grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-4 rounded-2xl border p-3 text-left transition ${
+                    track.id === activeTrack.id ? 'border-indigo-300/60 bg-indigo-400/18' : 'border-white/10 bg-white/6 hover:bg-white/10'
+                  }`}
+                  key={track.id}
+                  onClick={() => handleSelectTrack(track, true)}
+                  type="button"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img alt={track.title} className="h-12 w-12 rounded-xl object-cover" src={track.cover} />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-black text-white">{track.title}</span>
+                    <span className="mt-1 block truncate text-xs font-semibold text-white/50">{track.artist}</span>
+                  </span>
+                  <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] font-black text-white/48">
+                    {track.duration !== '--:--' ? track.duration : String(index + 1).padStart(2, '0')}
+                  </span>
+                </button>
+              ))}
             </div>
-          )}
+          </div>
         </aside>
       </div>
     </section>
