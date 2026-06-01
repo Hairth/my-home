@@ -13,13 +13,6 @@ export type DocumentItem = {
 
 export type Writing = DocumentItem;
 
-export type Moment = {
-  id: number;
-  date: string;
-  content: string;
-  mood: string;
-};
-
 export type Project = {
   id: string;
   name: string;
@@ -29,7 +22,7 @@ export type Project = {
   tags: string[];
 };
 
-export type Friend = {
+export type NavigationBookmark = {
   id: string;
   name: string;
   description: string;
@@ -123,32 +116,11 @@ ping example.com
 
 export const writings = seedDocuments;
 
-export const initialMoments: Moment[] = [
-  {
-    id: 1,
-    date: '2026-05-30',
-    content: '把个人网站的基础框架搭好了。Next.js 16 + Tailwind 4，继续往动态配置方向推进。',
-    mood: '✨',
-  },
-  {
-    id: 2,
-    date: '2026-05-29',
-    content: '参考了 XinghuisamaBlogs 的仪表盘和 jinghuashang 的欢迎页，决定融合成一个可配置的个人空间。',
-    mood: '🌿',
-  },
-  {
-    id: 3,
-    date: '2026-05-27',
-    content: '工具的边界，就是创造力的边界。网站也应该像工作台一样，随时可以调整。',
-    mood: '💡',
-  },
-];
-
 export const projects: Project[] = [
   {
     id: 'my-home',
     name: 'My Home',
-    description: '配置驱动的个人主页，包含欢迎页、文档、瞬间、项目、友链、音乐和设置中心。',
+    description: '配置驱动的个人主页，包含欢迎页、文档、项目、网站导航、音乐和设置中心。',
     href: 'https://github.com/Hairth/my-home',
     icon: '⌂',
     tags: ['Next.js', 'Tailwind', 'Personal Site'],
@@ -171,7 +143,7 @@ export const projects: Project[] = [
   },
 ];
 
-export const friends: Friend[] = [
+export const navigationBookmarks: NavigationBookmark[] = [
   {
     id: 'xinghui',
     name: 'XingHuiSama',

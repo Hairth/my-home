@@ -302,9 +302,8 @@ export function SettingsClient() {
           <Panel icon={<ToggleLeft size={20} />} title="首页模块">
             <div className="grid gap-3 md:grid-cols-2">
               <Toggle checked={settings.modules.dashboard} label="功能面板" onChange={(checked) => updateModule('dashboard', checked)} />
-              <Toggle checked={settings.modules.moments} label="瞬间" onChange={(checked) => updateModule('moments', checked)} />
               <Toggle checked={settings.modules.projects} label="项目" onChange={(checked) => updateModule('projects', checked)} />
-              <Toggle checked={settings.modules.friends} label="友链" onChange={(checked) => updateModule('friends', checked)} />
+              <Toggle checked={settings.modules.friends} label="网站导航" onChange={(checked) => updateModule('friends', checked)} />
               <Toggle checked={settings.modules.music} label="音乐" onChange={(checked) => updateModule('music', checked)} />
             </div>
           </Panel>

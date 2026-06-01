@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     default: 'Hairth · 星火',
     template: '%s | Hairth · 星火',
   },
-  description: 'Hairth 的数字花园。记录思考、分享生活、构建未来。技术笔记、生活随笔与瞬间感悟。',
+  description: 'Hairth 的数字花园。记录思考、整理导航、分享项目、构建未来。技术笔记、生活随笔与常用网站索引。',
   icons: {
     icon: '/favicon.ico',
   },

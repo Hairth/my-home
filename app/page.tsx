@@ -5,7 +5,6 @@ import {
   BookOpen,
   Camera,
   Clock3,
-  FileText,
   FolderKanban,
   Mail,
   Monitor,
@@ -16,7 +15,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { YoutubeMusicPlayer } from '@/components/music/YoutubeMusicPlayer';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
-import { initialMoments, projects, writings } from '@/data/site-data';
+import { projects, writings } from '@/data/site-data';
 
 function GlassCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return <section className={`glass-panel ${className}`}>{children}</section>;
@@ -138,8 +137,6 @@ export default function Home() {
             <div className="flex flex-wrap items-center gap-5 border-t border-white/10 px-6 py-5 md:px-8">
               <Stat label="文档" tone="text-indigo-300" value={writings.length} />
               <div className="h-10 w-px bg-white/10" />
-              <Stat label="瞬间" tone="text-fuchsia-300" value={initialMoments.length} />
-              <div className="h-10 w-px bg-white/10" />
               <Stat label="项目" tone="text-rose-300" value={projects.length} />
               <div className="ml-auto hidden text-xs font-semibold leading-6 text-white/45 md:block">{settings.profile.tagline}</div>
             </div>
@@ -170,24 +167,13 @@ export default function Home() {
               title="正在构建的工具"
             />
 
-            <div className="grid gap-5 sm:grid-cols-[1.7fr_0.9fr]">
-              <Link className="glass-panel min-h-44 p-7 transition hover:-translate-y-1 hover:border-indigo-300/35" href="/moments">
-                <div className="mb-3 flex items-center gap-3 text-xs font-black uppercase tracking-[0.18em] text-indigo-200">
-                  <FileText size={17} />
-                  Records
-                </div>
-                <h3 className="text-2xl font-black">瞬间同步完成</h3>
-                <p className="mt-3 line-clamp-2 text-sm font-semibold leading-6 text-white/62">{initialMoments[0].content}</p>
-              </Link>
-
-              <Link className="glass-panel flex min-h-44 flex-col items-center justify-center p-7 text-center transition hover:-translate-y-1 hover:border-indigo-300/35" href="/settings">
-                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500/30 text-indigo-100 shadow-[0_0_28px_rgba(99,102,241,0.32)]">
-                  <Moon size={28} />
-                </div>
-                <h3 className="text-xl font-black">夜间模式</h3>
-                <p className="mt-2 text-xs font-semibold text-white/48">背景模糊与遮罩可调</p>
-              </Link>
-            </div>
+            <Link className="glass-panel flex min-h-44 flex-col items-center justify-center p-7 text-center transition hover:-translate-y-1 hover:border-indigo-300/35" href="/settings">
+              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500/30 text-indigo-100 shadow-[0_0_28px_rgba(99,102,241,0.32)]">
+                <Moon size={28} />
+              </div>
+              <h3 className="text-xl font-black">夜间模式</h3>
+              <p className="mt-2 text-xs font-semibold text-white/48">背景模糊与遮罩可调</p>
+            </Link>
           </div>
         </div>
 
@@ -207,7 +193,7 @@ export default function Home() {
             <Link className="icon-tile" href="/projects" title="项目">
               <FolderKanban size={17} />
             </Link>
-            <Link className="icon-tile" href="/friends" title="友链">
+            <Link className="icon-tile" href="/friends" title="网站导航">
               <Users size={17} />
             </Link>
             <Link className="icon-tile" href="/music" title="音乐">

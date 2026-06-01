@@ -29,7 +29,6 @@ export type SiteSettings = {
     images: string[];
   };
   modules: {
-    moments: boolean;
     projects: boolean;
     friends: boolean;
     music: boolean;
@@ -48,7 +47,7 @@ export const defaultSiteSettings: SiteSettings = {
     navTitle: 'Hairth',
     authorName: 'Hairth',
     tagline: '记录思考，分享生活，构建未来',
-    bio: '一个用来收纳文档、瞬间、项目、友链和音乐的个人数字花园。',
+    bio: '一个用来收纳文档、项目、网站导航和音乐的个人数字花园。',
     avatarUrl: 'https://bu.dusays.com/2026/03/24/69c1e38ac1846.jpg',
     location: 'Online',
     email: 'hi@hairth.com',
@@ -75,7 +74,6 @@ export const defaultSiteSettings: SiteSettings = {
     ],
   },
   modules: {
-    moments: true,
     projects: true,
     friends: true,
     music: true,

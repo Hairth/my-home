@@ -45,7 +45,7 @@ export function AboutClient() {
           <div className="mt-10 space-y-6 text-base leading-8 text-zinc-700 dark:text-zinc-200">
             <p>{settings.profile.bio}</p>
             <p>
-              这里会同时承担个人主页、博客索引、瞬间记录、项目展板和设置中心。它参考了 XinghuisamaBlogs 的动态页面组织方式，也保留了
+              这里会同时承担个人主页、博客索引、项目展板、网站导航和设置中心。它参考了 XinghuisamaBlogs 的动态页面组织方式，也保留了
               jinghuashang 欢迎页的随机图与一言氛围。
             </p>
             <p>后续可以继续把文档内容接入 MDX、把设置同步到后端，或者把图片 API 扩展成多源轮换。</p>

@@ -25,13 +25,12 @@ export function SiteHeader() {
   const navLinks = useMemo(
     () => [
       { href: '/documents', label: '文档', enabled: true },
-      { href: '/moments', label: '瞬间', enabled: settings.modules.moments },
       { href: '/projects', label: '项目', enabled: settings.modules.projects },
-      { href: '/friends', label: '友链', enabled: settings.modules.friends },
+      { href: '/friends', label: '网站导航', enabled: settings.modules.friends },
       { href: '/music', label: '音乐', enabled: settings.modules.music },
       { href: '/about', label: '关于', enabled: true },
     ],
-    [settings.modules.friends, settings.modules.moments, settings.modules.music, settings.modules.projects],
+    [settings.modules.friends, settings.modules.music, settings.modules.projects],
   );
 
   useEffect(() => {
