@@ -9,7 +9,6 @@ import {
   CloudRain,
   CloudSnow,
   CloudSun,
-  Clock3,
   Droplets,
   LocateFixed,
   MapPin,
@@ -44,6 +43,11 @@ type WeatherResponse = {
   };
 };
 
+type ClockValue = {
+  date: string;
+  time: string;
+};
+
 function getWeatherMeta(code: number | null | undefined, isDay = true) {
   if (code === 0) return { icon: isDay ? Sun : CloudSun, label: isDay ? '晴朗' : '晴夜' };
   if ([1, 2, 3].includes(code ?? -1)) return { icon: CloudSun, label: '多云' };
@@ -68,11 +72,34 @@ function formatPlace(location: WeatherResponse['location']) {
   return [location.city, location.region, location.country].filter(Boolean).join(' · ') || '未知位置';
 }
 
+function formatClock(timezone?: string): ClockValue {
+  const date = new Date();
+  const dateParts = new Intl.DateTimeFormat('zh-CN', {
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: timezone || undefined,
+    weekday: 'short',
+    year: 'numeric',
+  }).formatToParts(date);
+  const getPart = (type: string) => dateParts.find((part) => part.type === type)?.value ?? '';
+
+  return {
+    date: `${getPart('year')}年${getPart('month')}月${getPart('day')}日 ${getPart('weekday')}`,
+    time: new Intl.DateTimeFormat('zh-CN', {
+      hour: '2-digit',
+      hour12: false,
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: timezone || undefined,
+    }).format(date),
+  };
+}
+
 export function WeatherCard() {
   const [weather, setWeather] = useState<WeatherResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [now, setNow] = useState('');
+  const [clock, setClock] = useState<ClockValue>({ date: '----年--月--日', time: '--:--:--' });
 
   const timezone = weather?.location?.timezone;
   const meta = getWeatherMeta(weather?.weather?.weatherCode, weather?.weather?.isDay);
@@ -113,14 +140,7 @@ export function WeatherCard() {
 
   useEffect(() => {
     function tick() {
-      const formatter = new Intl.DateTimeFormat('zh-CN', {
-        hour: '2-digit',
-        hour12: false,
-        minute: '2-digit',
-        second: '2-digit',
-        timeZone: timezone || undefined,
-      });
-      setNow(formatter.format(new Date()));
+      setClock(formatClock(timezone));
     }
 
     tick();
@@ -136,8 +156,8 @@ export function WeatherCard() {
 
   return (
     <section className="glass-panel flex min-h-44 flex-col justify-between overflow-hidden p-6 transition hover:-translate-y-1 hover:border-sky-300/35 md:p-7">
-      <div className="flex items-start justify-between gap-5">
-        <div>
+      <div className="grid gap-5 md:grid-cols-[128px_minmax(0,1fr)_64px] md:items-start">
+        <div className="min-w-0">
           <div className="adaptive-subtle inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em]">
             <LocateFixed size={13} />
             Weather
@@ -147,19 +167,19 @@ export function WeatherCard() {
             <span className="text-sm font-black">{statusText}</span>
           </div>
         </div>
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-sky-400/24 text-sky-100 shadow-[0_0_34px_rgba(56,189,248,0.36)]">
+        <div className="adaptive-text flex min-h-24 min-w-0 flex-col justify-center rounded-lg border border-white/10 bg-white/[0.06] px-5 py-4 text-center shadow-inner shadow-white/5">
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/60">{clock.date}</div>
+          <div className="mt-2 font-mono text-4xl font-black leading-none tracking-normal md:text-5xl">{clock.time}</div>
+        </div>
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center justify-self-end rounded-full bg-sky-400/24 text-sky-100 shadow-[0_0_34px_rgba(56,189,248,0.36)]">
           {isLoading ? <RefreshCw className="animate-spin" size={28} /> : error ? <AlertCircle size={28} /> : <WeatherIcon size={30} />}
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 text-xs font-bold sm:grid-cols-2 lg:grid-cols-4">
-        <div className="adaptive-muted flex items-center gap-2">
-          <Clock3 size={15} />
-          <span className="font-mono text-base">{now}</span>
-        </div>
-        <div className="adaptive-muted flex items-center gap-2">
+      <div className="mt-5 grid gap-3 text-xs font-bold md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center">
+        <div className="adaptive-muted flex min-w-0 items-center gap-2">
           <MapPin size={15} />
-          <span className="truncate">{formatPlace(weather?.location)}</span>
+          <span className="min-w-0 whitespace-normal break-words leading-5">{formatPlace(weather?.location)}</span>
         </div>
         <div className="adaptive-muted flex items-center gap-2">
           <Thermometer size={15} />
