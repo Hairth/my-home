@@ -547,7 +547,7 @@ export function DocumentManager() {
             新建
           </button>
           <button
-            className="inline-flex h-11 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-semibold transition hover:border-cyan-400 hover:text-cyan-700 dark:border-white/10 dark:bg-zinc-950 dark:hover:border-cyan-300 dark:hover:text-cyan-200"
+            className="inline-flex h-11 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-semibold text-zinc-700 transition hover:border-cyan-400 hover:text-cyan-700 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:border-cyan-300 dark:hover:text-cyan-200"
             onClick={() => uploadInputRef.current?.click()}
             type="button"
           >
@@ -560,11 +560,11 @@ export function DocumentManager() {
 
       <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
         <aside className="space-y-4">
-          <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-white/10 dark:bg-zinc-900">
+          <div className="rounded-lg border border-zinc-200 bg-white p-4 text-zinc-950 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100">
             <label className="relative block">
               <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={17} />
               <input
-                className="h-11 w-full rounded-lg border border-zinc-200 bg-white pl-10 pr-3 text-sm placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950"
+                className="h-11 w-full rounded-lg border border-zinc-200 bg-white pl-10 pr-3 text-sm text-zinc-950 placeholder:text-zinc-400 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100"
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="搜索文档"
                 value={query}
@@ -577,8 +577,8 @@ export function DocumentManager() {
               <button
                 className={`block w-full rounded-lg border p-4 text-left transition ${
                   document.id === activeDocument.id
-                    ? 'border-cyan-500 bg-cyan-50 dark:border-cyan-300 dark:bg-cyan-300/10'
-                    : 'border-zinc-200 bg-white hover:border-cyan-300 dark:border-white/10 dark:bg-zinc-900 dark:hover:border-cyan-300/70'
+                    ? 'border-cyan-500 bg-cyan-50 text-zinc-950 dark:border-cyan-300 dark:bg-cyan-300/10 dark:text-zinc-100'
+                    : 'border-zinc-200 bg-white text-zinc-950 hover:border-cyan-300 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-cyan-300/70'
                 }`}
                 key={document.id}
                 onClick={() => selectDocument(document.slug)}
@@ -601,16 +601,16 @@ export function DocumentManager() {
           </div>
         </aside>
 
-        <section className="min-w-0 overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-white/10 dark:bg-zinc-900">
+        <section className="min-w-0 overflow-hidden rounded-lg border border-zinc-200 bg-white text-zinc-950 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100">
           <div className="border-b border-zinc-200 p-4 dark:border-white/10">
             <div className="grid gap-3 lg:grid-cols-[1fr_220px]">
               <input
-                className="h-12 rounded-lg border border-zinc-200 bg-white px-4 text-xl font-semibold tracking-normal focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950"
+                className="h-12 rounded-lg border border-zinc-200 bg-white px-4 text-xl font-semibold tracking-normal text-zinc-950 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100"
                 onChange={(event) => updateActiveDocument({ title: event.target.value })}
                 value={activeDocument.title}
               />
               <input
-                className="h-12 rounded-lg border border-zinc-200 bg-white px-4 text-sm focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950"
+                className="h-12 rounded-lg border border-zinc-200 bg-white px-4 text-sm text-zinc-950 focus:border-cyan-500 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100"
                 onChange={(event) =>
                   updateActiveDocument({
                     tags: event.target.value

@@ -57,7 +57,7 @@ export default function ProjectsPage() {
       <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {visibleProjects.map((project) => (
           <Link
-            className="group flex min-h-72 flex-col justify-between rounded-lg border border-zinc-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-violet-400 dark:border-white/10 dark:bg-zinc-900"
+            className="group flex min-h-72 flex-col justify-between rounded-lg border border-zinc-200 bg-white p-6 text-zinc-950 transition hover:-translate-y-0.5 hover:border-violet-400 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100"
             href={project.href}
             key={project.id}
           >
