@@ -79,13 +79,13 @@ export function WelcomeSplash() {
             <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/25 bg-white/10 backdrop-blur-md">
               <Sparkles aria-hidden="true" size={24} />
             </div>
-            <h1 className="mx-auto max-w-3xl text-5xl font-semibold leading-none tracking-normal md:text-7xl">
+            <h1 className="adaptive-text mx-auto max-w-3xl text-5xl font-semibold leading-none tracking-normal md:text-7xl">
               {settings.welcome.title}
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-white/78 md:text-xl">
+            <p className="adaptive-muted mx-auto mt-6 max-w-2xl text-lg leading-8 md:text-xl">
               {settings.welcome.subtitle}
             </p>
-            <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-white/62 md:text-base">
+            <p className="adaptive-subtle mx-auto mt-6 max-w-2xl text-sm leading-7 md:text-base">
               {quote}
             </p>
             <button

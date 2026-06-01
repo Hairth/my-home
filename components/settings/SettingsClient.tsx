@@ -158,10 +158,10 @@ export function SettingsClient() {
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6">
-      <div className="mb-10 flex flex-col gap-6 border-b border-zinc-200 pb-10 dark:border-white/10 lg:flex-row lg:items-end lg:justify-between">
+      <div className="adaptive-border mb-10 flex flex-col gap-6 border-b border-zinc-200 pb-10 dark:border-white/10 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-5xl font-semibold tracking-normal text-white md:text-6xl">设置</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-white/72">
+          <h1 className="adaptive-text text-5xl font-semibold tracking-normal md:text-6xl">设置</h1>
+          <p className="adaptive-muted mt-4 max-w-2xl text-lg leading-8">
             欢迎词、图片轮换 API、主页模块和个人资料都会实时写入本地配置。
           </p>
         </div>

@@ -172,19 +172,19 @@ export function WebsiteNavigationManager() {
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6">
-      <Link className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-cyan-700 dark:hover:text-cyan-200" href="/">
+      <Link className="adaptive-muted adaptive-hover inline-flex items-center gap-2 text-sm" href="/">
         <ArrowLeft aria-hidden="true" size={16} />
         返回首页
       </Link>
 
-      <div className="mt-8 flex flex-col gap-6 border-b border-zinc-200 pb-10 dark:border-white/10 md:flex-row md:items-end md:justify-between">
+      <div className="adaptive-border mt-8 flex flex-col gap-6 border-b border-zinc-200 pb-10 dark:border-white/10 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-5xl font-semibold tracking-normal md:text-6xl">网站导航</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">
+          <h1 className="adaptive-text text-5xl font-semibold tracking-normal md:text-6xl">网站导航</h1>
+          <p className="adaptive-muted mt-4 max-w-2xl text-lg leading-8">
             像书签一样整理常用网站，支持新增、搜索、编辑、删除和移动排序。
           </p>
         </div>
-        <Compass aria-hidden="true" className="text-emerald-600 dark:text-emerald-300" size={42} />
+        <Compass aria-hidden="true" className="adaptive-icon" size={42} />
       </div>
 
       <div className="mt-8 grid gap-5 lg:grid-cols-[320px_1fr]">

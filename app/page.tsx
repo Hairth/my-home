@@ -25,7 +25,7 @@ function Stat({ label, value, tone }: { label: string; tone: string; value: numb
   return (
     <div className="min-w-16 text-center">
       <div className={`text-2xl font-black ${tone}`}>{value}</div>
-      <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">{label}</div>
+      <div className="adaptive-subtle mt-1 text-[10px] font-bold uppercase tracking-[0.18em]">{label}</div>
     </div>
   );
 }
@@ -86,7 +86,7 @@ export default function Home() {
   const coverImages = settings.background.images.length > 0 ? settings.background.images : ['https://bu.dusays.com/2026/03/24/69c1e38b4c370.jpg'];
 
   return (
-    <div className="relative min-h-screen px-4 pb-12 pt-24 text-white sm:px-6 lg:px-10">
+    <div className="adaptive-page relative min-h-screen px-4 pb-12 pt-24 sm:px-6 lg:px-10">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
         <div className="relative mx-auto w-full max-w-2xl">
           <Search className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-white/42" size={21} />
@@ -121,8 +121,8 @@ export default function Home() {
                   <img alt={settings.profile.authorName} className="h-full w-full rounded-[14px] object-cover" src={settings.profile.avatarUrl} />
                 </div>
                 <div className="min-w-0">
-                  <h1 className="truncate text-4xl font-black tracking-normal">{settings.profile.authorName}</h1>
-                  <p className="mt-3 max-w-lg text-sm font-semibold leading-7 text-white/68">{settings.profile.bio}</p>
+                  <h1 className="adaptive-text truncate text-4xl font-black tracking-normal">{settings.profile.authorName}</h1>
+                  <p className="adaptive-muted mt-3 max-w-lg text-sm font-semibold leading-7">{settings.profile.bio}</p>
                 </div>
               </div>
               <div className="flex shrink-0 gap-2">
@@ -138,7 +138,7 @@ export default function Home() {
               <Stat label="文档" tone="text-indigo-300" value={writings.length} />
               <div className="h-10 w-px bg-white/10" />
               <Stat label="项目" tone="text-rose-300" value={projects.length} />
-              <div className="ml-auto hidden text-xs font-semibold leading-6 text-white/45 md:block">{settings.profile.tagline}</div>
+              <div className="adaptive-subtle ml-auto hidden text-xs font-semibold leading-6 md:block">{settings.profile.tagline}</div>
             </div>
           </GlassCard>
 
@@ -171,15 +171,15 @@ export default function Home() {
               <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500/30 text-indigo-100 shadow-[0_0_28px_rgba(99,102,241,0.32)]">
                 <Moon size={28} />
               </div>
-              <h3 className="text-xl font-black">夜间模式</h3>
-              <p className="mt-2 text-xs font-semibold text-white/48">背景模糊与遮罩可调</p>
+              <h3 className="adaptive-text text-xl font-black">夜间模式</h3>
+              <p className="adaptive-subtle mt-2 text-xs font-semibold">背景模糊与遮罩可调</p>
             </Link>
           </div>
         </div>
 
         <GlassCard className="grid items-center gap-5 px-6 py-5 md:grid-cols-[160px_1fr_auto]">
-          <div className="font-mono text-3xl font-black tracking-widest">{now}</div>
-          <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-white/58">
+          <div className="adaptive-text font-mono text-3xl font-black tracking-widest">{now}</div>
+          <div className="adaptive-muted flex flex-wrap items-center gap-3 text-xs font-bold">
             <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.75)]" />
             系统已稳定运行
             <span className="rounded-lg border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-sky-200">Next.js 16</span>
@@ -202,7 +202,7 @@ export default function Home() {
           </div>
         </GlassCard>
 
-        <div className="flex justify-center text-xs font-semibold text-white/38">
+        <div className="adaptive-subtle flex justify-center text-xs font-semibold">
           <Clock3 className="mr-2" size={15} />
           工作进度同步到 Hairth/my-home
         </div>

@@ -9,7 +9,7 @@ export function AboutClient() {
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-16 sm:px-6">
-      <Link className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-cyan-700 dark:hover:text-cyan-200" href="/">
+      <Link className="adaptive-muted adaptive-hover inline-flex items-center gap-2 text-sm" href="/">
         <ArrowLeft aria-hidden="true" size={16} />
         返回首页
       </Link>
@@ -39,10 +39,10 @@ export function AboutClient() {
         </div>
 
         <div>
-          <h1 className="text-5xl font-semibold leading-none tracking-normal md:text-7xl">{settings.profile.authorName}</h1>
-          <p className="mt-4 text-2xl leading-9 text-zinc-600 dark:text-zinc-300">{settings.profile.tagline}</p>
+          <h1 className="adaptive-text text-5xl font-semibold leading-none tracking-normal md:text-7xl">{settings.profile.authorName}</h1>
+          <p className="adaptive-muted mt-4 text-2xl leading-9">{settings.profile.tagline}</p>
 
-          <div className="mt-10 space-y-6 text-base leading-8 text-zinc-700 dark:text-zinc-200">
+          <div className="adaptive-muted mt-10 space-y-6 text-base leading-8">
             <p>{settings.profile.bio}</p>
             <p>
               这里会同时承担个人主页、博客索引、项目展板、网站导航和设置中心。它参考了 XinghuisamaBlogs 的动态页面组织方式，也保留了
@@ -51,7 +51,7 @@ export function AboutClient() {
             <p>后续可以继续把文档内容接入 MDX、把设置同步到后端，或者把图片 API 扩展成多源轮换。</p>
           </div>
 
-          <div className="mt-12 border-t border-zinc-200 pt-8 text-xs text-zinc-400 dark:border-white/10">最后更新：2026-06-01</div>
+          <div className="adaptive-border adaptive-subtle mt-12 border-t border-zinc-200 pt-8 text-xs dark:border-white/10">最后更新：2026-06-01</div>
         </div>
       </section>
     </div>

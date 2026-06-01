@@ -5,12 +5,52 @@
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   --font-serif: "Noto Serif SC", "Songti SC", "SimSun", serif;
   --page-bg: #f6f8fb;
+  --adaptive-text: #f8fafc;
+  --adaptive-text-muted: rgb(248 250 252 / 0.78);
+  --adaptive-text-subtle: rgb(248 250 252 / 0.54);
+  --adaptive-text-shadow: 0 2px 16px rgb(2 6 23 / 0.66), 0 0 2px rgb(2 6 23 / 0.95);
+  --adaptive-text-shadow-soft: 0 2px 12px rgb(2 6 23 / 0.5);
+  --adaptive-border: rgb(255 255 255 / 0.18);
+  --adaptive-accent: rgb(125 211 252);
+  --adaptive-accent-glow: rgb(56 189 248 / 0.36);
 }
 
 body {
   font-family: var(--font-sans);
   background: #101322;
   color: #f8fafc;
+}
+
+.adaptive-page {
+  color: var(--adaptive-text);
+}
+
+.adaptive-text {
+  color: var(--adaptive-text);
+  text-shadow: var(--adaptive-text-shadow);
+}
+
+.adaptive-muted {
+  color: var(--adaptive-text-muted);
+  text-shadow: var(--adaptive-text-shadow-soft);
+}
+
+.adaptive-subtle {
+  color: var(--adaptive-text-subtle);
+  text-shadow: var(--adaptive-text-shadow-soft);
+}
+
+.adaptive-border {
+  border-color: var(--adaptive-border);
+}
+
+.adaptive-icon {
+  color: var(--adaptive-accent);
+  filter: drop-shadow(0 10px 28px var(--adaptive-accent-glow));
+}
+
+.adaptive-hover:hover {
+  color: var(--adaptive-text);
 }
 
 /* Beautiful Chinese typography support */

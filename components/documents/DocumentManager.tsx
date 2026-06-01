@@ -525,14 +525,14 @@ export function DocumentManager() {
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6">
-      <div className="mb-8 flex flex-col gap-5 border-b border-zinc-200 pb-8 dark:border-white/10 lg:flex-row lg:items-end lg:justify-between">
+      <div className="adaptive-border mb-8 flex flex-col gap-5 border-b border-zinc-200 pb-8 dark:border-white/10 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <div className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-cyan-700 dark:text-cyan-200">
+          <div className="adaptive-icon mb-2 inline-flex items-center gap-2 text-sm font-semibold">
             <FileText size={18} />
             DOCUMENTS
           </div>
-          <h1 className="text-5xl font-semibold tracking-normal md:text-6xl">文档</h1>
-          <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-600 dark:text-zinc-300">
+          <h1 className="adaptive-text text-5xl font-semibold tracking-normal md:text-6xl">文档</h1>
+          <p className="adaptive-muted mt-4 max-w-2xl text-base leading-8">
             本地文档库，支持新增、编辑、删除、上传 Markdown/TXT，并提供类似 Typora 的常用格式插入工具。
           </p>
         </div>

@@ -13,17 +13,17 @@ export default function ProjectsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-16 sm:px-6">
-      <Link className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-cyan-700 dark:hover:text-cyan-200" href="/">
+      <Link className="adaptive-muted adaptive-hover inline-flex items-center gap-2 text-sm" href="/">
         <ArrowLeft aria-hidden="true" size={16} />
         返回首页
       </Link>
 
-      <div className="mt-8 flex flex-col gap-6 border-b border-zinc-200 pb-10 dark:border-white/10 md:flex-row md:items-end md:justify-between">
+      <div className="adaptive-border mt-8 flex flex-col gap-6 border-b border-zinc-200 pb-10 dark:border-white/10 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-5xl font-semibold tracking-normal md:text-6xl">项目</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">像仪表盘一样整理正在构建的工具、站点和实验。</p>
+          <h1 className="adaptive-text text-5xl font-semibold tracking-normal md:text-6xl">项目</h1>
+          <p className="adaptive-muted mt-4 max-w-2xl text-lg leading-8">像仪表盘一样整理正在构建的工具、站点和实验。</p>
         </div>
-        <FolderKanban aria-hidden="true" className="text-violet-600 dark:text-violet-300" size={42} />
+        <FolderKanban aria-hidden="true" className="adaptive-icon" size={42} />
       </div>
 
       <div className="mt-8 flex flex-wrap gap-2">
@@ -31,7 +31,7 @@ export default function ProjectsPage() {
           className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
             !activeTag
               ? 'border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950'
-              : 'border-zinc-200 hover:border-violet-400 dark:border-white/10 dark:hover:border-violet-300'
+              : 'adaptive-muted adaptive-border border-zinc-200 hover:border-violet-400 dark:border-white/10 dark:hover:border-violet-300'
           }`}
           onClick={() => setActiveTag(null)}
           type="button"
@@ -43,7 +43,7 @@ export default function ProjectsPage() {
             className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
               activeTag === tag
                 ? 'border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950'
-                : 'border-zinc-200 hover:border-violet-400 dark:border-white/10 dark:hover:border-violet-300'
+                : 'adaptive-muted adaptive-border border-zinc-200 hover:border-violet-400 dark:border-white/10 dark:hover:border-violet-300'
             }`}
             key={tag}
             onClick={() => setActiveTag(tag === activeTag ? null : tag)}
