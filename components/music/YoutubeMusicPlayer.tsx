@@ -368,9 +368,30 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
     [],
   );
 
-  const playerFrame = (
-    <div className={`overflow-hidden rounded-2xl border border-white/12 bg-slate-950/38 ${compact ? 'mt-5 aspect-video' : 'mt-6 aspect-video min-h-[260px]'}`}>
+  const playerEngine = (
+    <div aria-hidden="true" className="pointer-events-none absolute -left-[9999px] top-0 h-[240px] w-[320px] overflow-hidden opacity-0">
       <div className="h-full w-full" id={playerElementId} />
+    </div>
+  );
+
+  const coverPanel = (
+    <div className="relative mt-6 overflow-hidden rounded-2xl border border-white/12 bg-slate-950/38 p-5">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="" className="absolute inset-0 h-full w-full object-cover opacity-28 blur-md scale-110" src={activeTrack.cover} />
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950/62 via-indigo-950/38 to-slate-950/72" />
+      <div className="relative flex min-h-[230px] flex-col items-center justify-center text-center">
+        <div className="relative mb-5 h-28 w-28 overflow-hidden rounded-full border border-white/25 bg-white/10 p-1 shadow-[0_0_45px_rgba(99,102,241,0.35)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img alt={activeTrack.title} className={`h-full w-full rounded-full object-cover ${isPlaying ? 'animate-spin-slow' : ''}`} src={activeTrack.cover} />
+          <span className="absolute inset-0 m-auto h-8 w-8 rounded-full bg-slate-950/85 ring-2 ring-white/60" />
+        </div>
+        <div className="rounded-full border border-white/12 bg-white/10 px-4 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-100">
+          Audio Mode
+        </div>
+        <p className="mt-4 max-w-sm text-sm font-semibold leading-6 text-white/62">
+          已隐藏视频画面，只保留音乐播放控制。
+        </p>
+      </div>
     </div>
   );
 
@@ -438,7 +459,7 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
           </div>
         </div>
 
-        {playerFrame}
+        {playerEngine}
 
         <div className="mt-5 flex items-center gap-2 text-xs font-semibold text-white/44">
           <Disc3 size={14} />
@@ -513,7 +534,8 @@ export function YoutubeMusicPlayer({ compact = false }: YoutubeMusicPlayerProps)
             <Volume2 className="text-white/35" size={22} />
           </div>
 
-          {playerFrame}
+          {coverPanel}
+          {playerEngine}
 
           <div className="mt-5 flex flex-wrap items-center gap-3 text-xs font-semibold text-white/44">
             <span>{playerMessage}</span>
